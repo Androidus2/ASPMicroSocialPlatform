@@ -4,6 +4,7 @@ using ASPMicroSocialPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,13 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPMicroSocialPlatform.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241209193350_ApplicationUser")]
+    partial class ApplicationUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -30,9 +33,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -43,15 +43,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -76,9 +67,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ProfilePicture")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -91,8 +79,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -102,154 +88,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Follow", b =>
-                {
-                    b.Property<string>("FollowedId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("FollowerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("FollowedId", "FollowerId");
-
-                    b.HasIndex("FollowerId");
-
-                    b.ToTable("Follows");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Group", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Groups");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("GroupId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Messages");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Post", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.UserGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("IsModerator")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id", "UserId", "GroupId");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserGroups");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -389,100 +227,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("ASPMicroSocialPlatform.Models.Group", null)
-                        .WithMany("Users")
-                        .HasForeignKey("GroupId");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Comment", b =>
-                {
-                    b.HasOne("ASPMicroSocialPlatform.Models.Post", "Post")
-                        .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "User")
-                        .WithMany("Comments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Follow", b =>
-                {
-                    b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "Followed")
-                        .WithMany("Followers")
-                        .HasForeignKey("FollowedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "Follower")
-                        .WithMany("Following")
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Followed");
-
-                    b.Navigation("Follower");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Message", b =>
-                {
-                    b.HasOne("ASPMicroSocialPlatform.Models.Group", "Group")
-                        .WithMany("Messages")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "User")
-                        .WithMany("Messages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Post", b =>
-                {
-                    b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "User")
-                        .WithMany("Posts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.UserGroup", b =>
-                {
-                    b.HasOne("ASPMicroSocialPlatform.Models.Group", "Group")
-                        .WithMany("UserGroups")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "User")
-                        .WithMany("UserGroups")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -532,35 +276,6 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Comments");
-
-                    b.Navigation("Followers");
-
-                    b.Navigation("Following");
-
-                    b.Navigation("Messages");
-
-                    b.Navigation("Posts");
-
-                    b.Navigation("UserGroups");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Group", b =>
-                {
-                    b.Navigation("Messages");
-
-                    b.Navigation("UserGroups");
-
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("ASPMicroSocialPlatform.Models.Post", b =>
-                {
-                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

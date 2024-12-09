@@ -4,6 +4,7 @@ using ASPMicroSocialPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPMicroSocialPlatform.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241209205014_Models6")]
+    partial class Models6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,13 +137,21 @@ namespace ASPMicroSocialPlatform.Data.Migrations
 
             modelBuilder.Entity("ASPMicroSocialPlatform.Models.Follow", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("FollowedId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FollowerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("FollowedId", "FollowerId");
+                    b.HasKey("Id", "FollowedId", "FollowerId");
+
+                    b.HasIndex("FollowedId");
 
                     b.HasIndex("FollowerId");
 

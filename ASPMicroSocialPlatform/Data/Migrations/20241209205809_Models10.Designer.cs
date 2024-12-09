@@ -4,6 +4,7 @@ using ASPMicroSocialPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPMicroSocialPlatform.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241209205809_Models10")]
+    partial class Models10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,6 +142,12 @@ namespace ASPMicroSocialPlatform.Data.Migrations
 
                     b.Property<string>("FollowerId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("FollowedId", "FollowerId");
 
@@ -420,13 +429,13 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                     b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "Followed")
                         .WithMany("Followers")
                         .HasForeignKey("FollowedId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "Follower")
                         .WithMany("Following")
                         .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Followed");
@@ -469,13 +478,13 @@ namespace ASPMicroSocialPlatform.Data.Migrations
                     b.HasOne("ASPMicroSocialPlatform.Models.Group", "Group")
                         .WithMany("UserGroups")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ASPMicroSocialPlatform.Models.ApplicationUser", "User")
                         .WithMany("UserGroups")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Group");
