@@ -44,12 +44,11 @@ namespace ASPMicroSocialPlatform.Data
                 .HasOne(ab => ab.Follower)
                 .WithMany(ab => ab.Following)
                 .HasForeignKey(ab => ab.FollowerId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Follow>()
                 .HasOne(ab => ab.Followed)
                 .WithMany(ab => ab.Followers)
-                .HasForeignKey(ab => ab.FollowedId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(ab => ab.FollowedId);
 
         }
 

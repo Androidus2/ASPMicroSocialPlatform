@@ -6,6 +6,7 @@ namespace ASPMicroSocialPlatform.Models
     public class Follow
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        
         public int Id { get; set; }
         public string? FollowerId { get; set; }
         public string? FollowedId { get; set; }
