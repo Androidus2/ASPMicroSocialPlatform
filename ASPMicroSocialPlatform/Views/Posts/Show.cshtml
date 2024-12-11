@@ -1,0 +1,31 @@
+﻿<!--
+	Get the model for a post and show its information (description and image) in a nice manner using bootstrap
+-->
+
+@model ASPMicroSocialPlatform.Models.Post
+
+<div class="card">
+	<img src="@Model.Image" class="card-img-top" alt="...">
+	<div class="card-body">
+		<p class="card-text">@Model.Description</p>
+	</div>
+	<div class="card-footer">
+		<p class="card-text">Posted by: @Model.User.UserName</p>
+	</div>
+</div>
+
+<br />
+<br />
+
+<h3>Comments</h3>
+@foreach (var comment in Model.Comments)
+{
+	<div class="card">
+		<div class="card-body">
+			<p class="card-text">@comment.Content</p>
+		</div>
+		<div class="card-footer">
+			<p class="card-text">Posted by: @comment.User.UserName</p>
+		</div>
+	</div>
+}

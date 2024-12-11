@@ -1,0 +1,27 @@
+﻿<!--
+	This view is used to create a new post.
+	It contains a form with a text area for the post content and a submit button.
+	The form is submitted to the PostsController's New action.
+-->
+
+@model ASPMicroSocialPlatform.Models.Post
+
+<h2>New Post</h2>
+
+<hr />
+<br />
+
+<form asp-action="New" method="post" enctype="multipart/form-data">
+	<div class="form-group">
+		<label asp-for="Description"></label>
+		<textarea asp-for="Description" class="form-control"></textarea>
+	</div>
+	<br />
+	<div class="form-group">
+		<label asp-for="Image">Incarca Imaginea</label>
+		<input asp-for="Image" class="form-control" type="file" />
+		<span asp-validation-for="Image" class="text-danger"></span>
+	</div>
+	<br />
+	<button type="submit" class="btn btn-primary">Post</button>
+</form>

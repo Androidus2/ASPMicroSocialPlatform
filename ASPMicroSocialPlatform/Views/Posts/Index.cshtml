@@ -1,0 +1,22 @@
+﻿<!--
+	Show all posts for testing purposes
+-->
+
+@model IEnumerable<ASPMicroSocialPlatform.Models.Post>
+
+<h2>Posts</h2>
+
+@foreach (var post in Model)
+{
+	<!--make a link towards the post-->
+	<div class="card">
+		<img src="@post.Image" class="card-img-top" alt="...">
+		<div class="card-body">
+			<p class="card-text">@post.Description</p>
+		</div>
+		<div class="card-footer">
+			<p class="card-text">Posted by: @post.User.UserName</p>
+		</div>
+		<a asp-controller="Posts" asp-action="Show" asp-route-id="@post.Id">View</a>
+	</div>
+}
