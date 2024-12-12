@@ -5,9 +5,12 @@
 @model ASPMicroSocialPlatform.Models.Post
 
 <div class="card">
-	<img src="@Model.Image" class="card-img-top" alt="...">
+	@if (!string.IsNullOrEmpty(Model.Image))
+	{
+		<img src="@Model.Image" style="height:500px; width: auto;" class="card-img-top" alt="...">
+	}
 	<div class="card-body">
-		<p class="card-text">@Model.Description</p>
+		<p class="card-text">@Html.Raw(Model.Description)</p>
 	</div>
 	<div class="card-footer">
 		<p class="card-text">Posted by: @Model.User.UserName</p>
@@ -17,15 +20,171 @@
 <br />
 <br />
 
-<h3>Comments</h3>
-@foreach (var comment in Model.Comments)
-{
-	<div class="card">
-		<div class="card-body">
-			<p class="card-text">@comment.Content</p>
+<div class="card">
+	<div class="card-body">
+		<button class="btn btn-primary" onclick="toggleNewCommentForm()" id="newCommentButton">Adauga comentariu</button>
+		
+		<div id="newCommentForm" style="display:none;">
+			<form method="post" asp-controller="Posts" asp-action="AddComment">
+				<input type="hidden" name="PostId" value="@Model.Id" />
+				<div class="form-group">
+					<label for="Content">Comentariu</label>
+					<textarea class="form-control" name="Content" id="Content" rows="5" style="resize: none"></textarea>
+					@if (TempData["ShowNewComment"] != null)
+					{
+						@* <span asp-validation-for="Description" class="text-danger"></span>
+						We cannot use asp-validation-for because we are not using a model for the form, so we need to use TempData to show the error message
+						*@
+						@if (TempData["NewCommentError"] != null){
+							<span class="text-danger">@TempData["NewCommentError"]</span>
+						}
+					}
+				</div>
+				<br />
+				<button type="submit" class="btn btn-primary">Salveaza</button>
+				<button type="button" class="btn btn-secondary" onclick="toggleNewCommentForm()">Anuleaza</button>
+			</form>
 		</div>
-		<div class="card-footer">
-			<p class="card-text">Posted by: @comment.User.UserName</p>
-		</div>
+
+		<hr />
+		<br />
+
+		<h3 class="card-title">Comentarii: @Enumerable.Count(Model.Comments)</h3>
+		@foreach (var comment in Model.Comments)
+		{
+			<div class="card">
+				<div class="card-body">
+					<div id="editForm-@comment.Id" style="display:none;">
+						<form method="post" asp-controller="Posts" asp-action="EditComment">
+							<input type="hidden" name="Id" value="@comment.Id" />
+							<input type="hidden" name="PostId" value="@Model.Id" />
+							<input type="hidden" name="UserId" value="@comment.UserId" />
+							<div class="form-group">
+								<h5 for="Content">Editare comentariu</h5>
+								@if (TempData["ShowEditComment"] != null && comment.Id == (int)TempData["ShowEditComment"])
+								{
+									<textarea class="form-control" name="Content" id="Content" rows="3" style="resize: none">@TempData["LastCommentContent"]</textarea>
+									@* <span asp-validation-for="Content" class="text-danger"></span>
+									We cannot use asp-validation-for because we are not using a model for the form, so we need to use TempData to show the error message
+									*@
+									@if (TempData["EditCommentError" + comment.Id] != null)
+									{
+										<span class="text-danger">@TempData["EditCommentError" + comment.Id]</span>
+									}
+								}
+								else
+								{
+									<textarea class="form-control" name="Content" id="Content" rows="3" style="resize: none">@comment.Content</textarea>
+								}
+							</div>
+							<br />
+							<button type="submit" class="btn btn-primary">Salveaza</button>
+							<button type="button" class="btn btn-secondary" onclick="toggleEditForm(@comment.Id)">Anuleaza</button>
+						</form>
+					</div>
+
+					<div id="commentContent-@comment.Id">
+						<div class="card-text">
+							@comment.Content
+						</div>
+
+						<div class="d-flex justify-content-between flex-row mt-5">
+							<div>
+								<i class="bi bi-person"> @comment.User.UserName </i>
+							</div>
+							<span class="px-1 align-content-center">
+								@comment.Date
+							</span>
+						</div>
+
+						<br />
+
+						@if (User.IsInRole("Admin") || comment.UserId == ViewBag.CurrentUserId)
+						{
+							<a class="btn btn-danger" href="/Posts/DeleteComment/@comment.Id">Stergere comentariu</a>
+						}
+						@if (comment.UserId == ViewBag.CurrentUserId)
+						{
+							<a class="btn btn-secondary" onclick="toggleEditForm(@comment.Id)">Editare comentariu</a>
+						}
+					</div>
+
+					@if (TempData["ShowEditComment"] != null && comment.Id == (int)TempData["ShowEditComment"])
+					{
+						<text>
+							<script>
+								function toggleEditForm(commentId) {
+									var editForm = document.getElementById('editForm-' + commentId);
+									var commentContent = document.getElementById('commentContent-' + commentId);
+									if (editForm.style.display === 'none') {
+										editForm.style.display = 'block';
+										commentContent.style.display = 'none';
+									}
+									else {
+										editForm.style.display = 'none';
+										commentContent.style.display = 'block';
+									}
+								}
+
+								toggleEditForm(@TempData["ShowEditComment"]);
+
+							</script>
+						</text>
+					}
+				</div>
+			</div>
+			<br />
+		}
 	</div>
-}
+</div>
+
+
+<script>
+	function toggleEditForm(commentId) {
+		var editForm = document.getElementById('editForm-' + commentId);
+		var commentContent = document.getElementById('commentContent-' + commentId);
+		if (editForm.style.display === 'none') {
+			editForm.style.display = 'block';
+			commentContent.style.display = 'none';
+		}
+		else {
+			editForm.style.display = 'none';
+			commentContent.style.display = 'block';
+		}
+	}
+
+	function toggleNewCommentForm() {
+		var newCommentForm = document.getElementById('newCommentForm');
+		var newCommentButton = document.getElementById('newCommentButton');
+		if (newCommentForm.style.display === 'none') {
+			newCommentForm.style.display = 'block';
+			newCommentButton.style.display = 'none';
+		}
+		else {
+			newCommentForm.style.display = 'none';
+			newCommentButton.style.display = 'block';
+		}
+	}
+
+	window.onload = function () {
+		@if (TempData["ShowEditComment"] != null)
+		{
+			<text>
+				document.addEventListener('DOMContentLoaded', function() {
+					toggleEditForm(@TempData["ShowEditComment"]);
+				});
+			</text>
+		}
+	}
+
+	@if (TempData["ShowNewComment"] != null)
+	{
+		<text>
+				document.addEventListener('DOMContentLoaded', function() {
+					toggleNewCommentForm();
+				});
+		</text>
+	}
+
+
+</script>

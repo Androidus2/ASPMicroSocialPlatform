@@ -1,0 +1,45 @@
+﻿@*
+	Show information about a specific user, such as first name, last name, bio and profile picture
+	If there is no profile picture, display wwwroot/images/MissingNo.png
+	Display all posts by the user
+*@
+
+@model ASPMicroSocialPlatform.Models.ApplicationUser
+
+@{
+	ViewBag.Title = "User";
+}
+
+<h2 class="my-4">@Model.FirstName @Model.LastName</h2>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-4 mb-4">
+			<div class="card">
+				<img src="@(!string.IsNullOrEmpty(Model.ProfilePicture) ? Model.ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="card-img-top" alt="User Image" style="width: 100px; height: 100px; object-fit: cover;">
+				<div class="card-body">
+					<h3 class="card-title">@Model.FirstName @Model.LastName</h3>
+					<p class="card-text">@Model.Bio</p>
+					<p class="card-text"><small class="text-muted">@Model.Email</small></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<h3 class="my-4">Posts</h3>
+@foreach (var post in Model.Posts)
+{
+	<div class="card my-2">
+		<div class="card-body">
+			<a href="@Url.Action("Show", "Posts", new { id = post.Id })">
+				@if (post.Image != null)
+				{
+					<img src="@post.Image" class="card-img-top" alt="Post Image" style="width: 200px; height: 200px; object-fit: cover;">
+				}
+				<h5 class="card-title">@post.Description</h5>
+				<p class="card-text"><small class="text-muted">@post.Date</small></p>
+			</a>
+		</div>
+	</div>
+}

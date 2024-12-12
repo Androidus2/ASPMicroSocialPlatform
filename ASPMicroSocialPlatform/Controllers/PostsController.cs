@@ -1,9 +1,11 @@
 ﻿using ASPMicroSocialPlatform.Data;
 using ASPMicroSocialPlatform.Models;
+using Ganss.Xss;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Net.NetworkInformation;
 
 namespace ASPMicroSocialPlatform.Controllers
@@ -43,38 +45,42 @@ namespace ASPMicroSocialPlatform.Controllers
                 .ThenInclude(c => c.User)
                 .Include(p => p.User)
                 .FirstOrDefault(p => p.Id == id);
-            return View(post);
+			ViewBag.CurrentUserId = _userManager.GetUserId(User);
+			return View(post);
         }
 
         [HttpGet]
         [Authorize(Roles = "User,Admin")]
         public IActionResult New()
         {
-            return View();
-        }
+            Post post = new Post();
+			return View(post);
+		}
 
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
-        public async Task<IActionResult> NewAsync(Post post, IFormFile Image)
+        public async Task<IActionResult> NewAsync(Post post, IFormFile? Image, string? ExistingImagePath)
         {
-            post.Date = DateTime.Now;
+			var sanitizer = new HtmlSanitizer();
+            sanitizer.AllowedTags.Add("iframe");
+			post.Date = DateTime.Now;
 
-            if (Image != null && Image.Length > 0)
+			if (Image != null && Image.Length > 0)
             {
-                // Verificăm extensia
+                // Verificam extensia
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mov" };
                 var fileExtension = Path.GetExtension(Image.FileName).ToLower();
                 if (!allowedExtensions.Contains(fileExtension))
                 {
-                    ModelState.AddModelError("ArticleImage", "Fișierul trebuie să fie o imagine(jpg, jpeg, png, gif) sau un video(mp4, mov).");
-                    //return View(post);
-                    // Need to handle the errors
-                    return View();
+                    ModelState.AddModelError("ArticleImage", "Fisierul trebuie sa fie o imagine(jpg, jpeg, png, gif) sau un video(mp4, mov).");
+                    TempData["message"] = "Imaginea nu a putut fi adaugata!";
+					TempData["messageType"] = "error";
+					return View(post);
                 }
                 // Cale stocare
                 var storagePath = Path.Combine(_env.WebRootPath, "images",Image.FileName);
                 var databaseFileName = "/images/" + Image.FileName;
-                // Salvare fișier
+                // Salvare fisier
                 using (var fileStream = new FileStream(storagePath, FileMode.Create))
                 {
                     await Image.CopyToAsync(fileStream);
@@ -82,12 +88,266 @@ namespace ASPMicroSocialPlatform.Controllers
                 ModelState.Remove(nameof(post.Image));
                 post.Image = databaseFileName;
             }
+			else if(ExistingImagePath != null)
+			{
+				post.Image = ExistingImagePath;
+			}
 
             post.UserId = _userManager.GetUserId(User);
-            _context.Posts.Add(post);
+            if (post.Description != null)
+			{
+				post.Description = sanitizer.Sanitize(post.Description);
+			}
+
+			if (!ModelState.IsValid)
+			{
+
+				TempData["message"] = "Postarea nu a putut fi adaugata!";
+				TempData["messageType"] = "error";
+
+				return View(post);
+			}
+
+
+			_context.Posts.Add(post);
             _context.SaveChanges();
-            return RedirectToAction("Index", "Home");
+
+            TempData["message"] = "Postarea a fost adaugata!";
+			TempData["messageType"] = "success";
+
+			return RedirectToAction("Index", "Posts");
         }
 
-    }
+
+		[HttpGet]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult Edit(int id)
+		{
+			// check if the post exists and if the user is the owner of the post
+			var post = _context.Posts.FirstOrDefault(p => p.Id == id);
+			if (post == null)
+			{
+				TempData["message"] = "Postarea nu exista!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Home");
+			}
+			if (post.UserId != _userManager.GetUserId(User))
+			{
+				TempData["message"] = "Nu ai dreptul sa editezi aceasta postare!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+			return View(post);
+		}
+
+		[HttpPost]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult EditAsync(Post post, IFormFile? Image, string? ExistingImagePath)
+		{
+			// check if the post exists and if the user is the owner of the post
+			var postToUpdate = _context.Posts.FirstOrDefault(p => p.Id == post.Id);
+			if (postToUpdate == null)
+			{
+				TempData["message"] = "Postarea nu exista!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+			if (postToUpdate.UserId != _userManager.GetUserId(User))
+			{
+				TempData["message"] = "Nu ai dreptul sa editezi aceasta postare!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+
+			var sanitizer = new HtmlSanitizer();
+			sanitizer.AllowedTags.Add("iframe");
+			if (post.Description != null)
+			{
+				post.Description = sanitizer.Sanitize(post.Description);
+			}
+
+			// check if the image was changed
+			if (Image != null && Image.Length > 0)
+			{
+                // Verificam extensia
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mov" };
+				var fileExtension = Path.GetExtension(Image.FileName).ToLower();
+				if (!allowedExtensions.Contains(fileExtension))
+				{
+					ModelState.AddModelError("ArticleImage", "Fisierul trebuie sa fie o imagine(jpg, jpeg, png, gif) sau un video(mp4, mov).");
+					TempData["message"] = "Imaginea nu a putut fi adaugata!";
+					TempData["messageType"] = "error";
+					return View(post);
+				}
+				// Cale stocare
+				var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
+				var databaseFileName = "/images/" + Image.FileName;
+				// Salvare fisier
+				using (var fileStream = new FileStream(storagePath, FileMode.Create))
+				{
+					Image.CopyTo(fileStream);
+				}
+				ModelState.Remove(nameof(post.Image));
+				post.Image = databaseFileName;
+			}
+			else if(ExistingImagePath != null)
+			{
+                post.Image = ExistingImagePath;
+			}
+
+            postToUpdate.Description = post.Description;
+            postToUpdate.Image = post.Image;
+            _context.SaveChanges();
+			TempData["message"] = "Postarea a fost editata!";
+			TempData["messageType"] = "success";
+			return RedirectToAction("Index", "Posts");
+		}
+
+		[HttpGet]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult Delete(int id)
+		{
+			// check if the post exists and if the user is the owner of the post or an admin
+			var post = _context.Posts.FirstOrDefault(p => p.Id == id);
+            if (post == null)
+			{
+                TempData["message"] = "Postarea nu exista!";
+                TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+			if (post.UserId != _userManager.GetUserId(User) && !_userManager.IsInRoleAsync(_userManager.GetUserAsync(User).Result, "Admin").Result)
+			{
+				TempData["message"] = "Nu ai dreptul sa stergi aceasta postare!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+
+			// remove the comments of the post
+			if (post.Comments != null)
+			{
+				foreach (var comment in post.Comments)
+				{
+					_context.Comments.Remove(comment);
+				}
+			}
+
+            _context.Posts.Remove(post);
+			_context.SaveChanges();
+			TempData["message"] = "Postarea a fost stearsa!";
+			TempData["messageType"] = "success";
+			return RedirectToAction("Index", "Posts");
+		}
+
+
+		[HttpPost]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult AddComment([FromForm] Comment comment)
+		{
+			comment.Date = DateTime.Now;
+			comment.UserId = _userManager.GetUserId(User);
+			if (ModelState.IsValid)
+			{
+				_context.Comments.Add(comment);
+				_context.SaveChanges();
+				TempData["message"] = "Comentariul a fost adaugat!";
+				TempData["messageType"] = "success";
+				return Redirect("/Posts/Show/" + comment.PostId);
+			}
+			else
+			{
+				Post post = _context.Posts
+					.Include(p => p.Comments)
+					.ThenInclude(c => c.User)
+					.Include(p => p.User)
+					.FirstOrDefault(p => p.Id == comment.PostId);
+				TempData["ShowNewComment"] = true;
+				TempData["message"] = "Comentariul nu a putut fi adaugat!";
+				TempData["messageType"] = "error";
+
+
+				foreach (var modelState in ViewData.ModelState.Values)
+				{
+					foreach (var error in modelState.Errors)
+					{
+						TempData["NewCommentError"] = error.ErrorMessage;
+					}
+				}
+
+				return Redirect("/Posts/Show/" + comment.PostId);
+			}
+		}
+
+
+		[HttpPost]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult EditComment([FromForm] Comment comment)
+		{
+			comment.Date = DateTime.Now;
+			if (ModelState.IsValid)
+			{
+
+				Console.WriteLine("Comment's userID: " + comment.UserId);
+				Console.WriteLine("Current user's ID: " + _userManager.GetUserId(User));
+				if (comment.UserId != _userManager.GetUserId(User))
+				{
+					TempData["message"] = "Nu aveti dreptul sa editati acest comentariu!";
+					TempData["messageType"] = "error";
+					return Redirect("/Posts/Show/" + comment.PostId);
+				}
+
+				_context.Comments.Update(comment);
+				_context.SaveChanges();
+				TempData["message"] = "Comentariul a fost modificat!";
+				TempData["messageType"] = "success";
+				return Redirect("/Posts/Show/" + comment.PostId);
+			}
+			else
+			{
+				Post post = _context.Posts
+					.Include(p => p.Comments)
+					.ThenInclude(c => c.User)
+					.Include(p => p.User)
+					.FirstOrDefault(p => p.Id == comment.PostId);
+				TempData["ShowEditComment"] = comment.Id;
+				TempData["LastCommentContent"] = comment.Content;
+				TempData["message"] = "Comentariul nu a putut fi modificat!";
+				TempData["messageType"] = "error";
+
+				foreach (var modelState in ViewData.ModelState.Values)
+				{
+					foreach (var error in modelState.Errors)
+					{
+						TempData["EditCommentError" + comment.Id] = error.ErrorMessage;
+					}
+				}
+
+				return Redirect("/Posts/Show/" + comment.PostId);
+			}
+		}
+
+		[HttpGet]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult DeleteComment(int id)
+		{
+			var comment = _context.Comments.FirstOrDefault(c => c.Id == id);
+			if (comment == null)
+			{
+				TempData["message"] = "Comentariul nu exista!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+			if (comment.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+			{
+				TempData["message"] = "Nu aveti dreptul sa stergeti acest comentariu!";
+				TempData["messageType"] = "error";
+				return RedirectToAction("Index", "Posts");
+			}
+			_context.Comments.Remove(comment);
+			_context.SaveChanges();
+			TempData["message"] = "Comentariul a fost sters!";
+			TempData["messageType"] = "success";
+			return Redirect("/Posts/Show/" + comment.PostId);
+		}
+
+	}
 }

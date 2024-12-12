@@ -1,11 +1,11 @@
 ﻿@model ASPMicroSocialPlatform.Models.Post
 
-<h2>Postare noua</h2>
+<h2>Editeaza postarea</h2>
 
 <hr />
 <br />
 
-<form asp-action="New" method="post" enctype="multipart/form-data">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <label asp-for="Id" style="display:none"></label>
     <div class="form-group">
         <label asp-for="Description">Descriere:</label>
@@ -37,7 +37,7 @@
     </div>
 
     <br />
-    <button type="submit" class="btn btn-primary">Posteaza</button>
+    <button type="submit" class="btn btn-primary">Editeaza</button>
 </form>
 
 <script>

@@ -14,7 +14,9 @@ namespace ASPMicroSocialPlatform.Models
         [Required(ErrorMessage = "Continutul este obligatoriu!")]
         public string? Content { get; set; }
 
-        public virtual ApplicationUser? User { get; set; }
+		public DateTime Date { get; set; }
+
+		public virtual ApplicationUser? User { get; set; }
 
         public virtual Post? Post { get; set; }
     }

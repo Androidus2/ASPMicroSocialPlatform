@@ -33,6 +33,23 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <!--display any messages we have in TempData["message"] either an as error or succes based on TempData["messageType"]-->
+            @if (TempData["message"] != null)
+			{
+                @if (Convert.ToString(TempData["messageType"]) == "success")
+                {
+                    <div class="alert alert-success">
+                        @TempData["message"]
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-danger">
+                        @TempData["message"]
+                    </div>
+                }
+			}
+
             @RenderBody()
         </main>
     </div>

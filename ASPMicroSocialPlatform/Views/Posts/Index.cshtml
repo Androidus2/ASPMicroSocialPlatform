@@ -10,13 +10,17 @@
 {
 	<!--make a link towards the post-->
 	<div class="card">
-		<img src="@post.Image" class="card-img-top" alt="...">
+		<img src="@post.Image" class="card-img-top" alt="..." height="300" width="300">
 		<div class="card-body">
 			<p class="card-text">@post.Description</p>
 		</div>
 		<div class="card-footer">
 			<p class="card-text">Posted by: @post.User.UserName</p>
 		</div>
-		<a asp-controller="Posts" asp-action="Show" asp-route-id="@post.Id">View</a>
+		<div class="d-flex">
+			<a asp-controller="Posts" asp-action="Show" asp-route-id="@post.Id">View</a>
+			<a asp-controller="Posts" asp-action="Edit" asp-route-id="@post.Id">Edit</a>
+			<a asp-controller="Posts" asp-action="Delete" asp-route-id="@post.Id">Delete</a>
+		</div>
 	</div>
 }

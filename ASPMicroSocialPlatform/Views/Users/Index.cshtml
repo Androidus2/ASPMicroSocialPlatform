@@ -1,0 +1,32 @@
+﻿@*
+    Show all users
+*@
+
+@model IEnumerable<ASPMicroSocialPlatform.Models.ApplicationUser>
+
+@{
+    ViewBag.Title = "Users";
+}
+
+<h2 class="my-4">Users</h2>
+
+<div class="container">
+    <div class="row">
+        @for (var i = 0; i < Model.Count(); i++)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="@(!string.IsNullOrEmpty(Model.ElementAt(i).ProfilePicture) ? Model.ElementAt(i).ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="card-img-top" alt="User Image" style="width: 100px; height: 100px; object-fit: cover;">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <a href="@Url.Action("Show", "Users", new { id = Model.ElementAt(i).Id })">@Model.ElementAt(i).FirstName @Model.ElementAt(i).LastName</a>
+                        </h3>
+                        <p class="card-text">@Model.ElementAt(i).Bio</p>
+                        <p class="card-text"><small class="text-muted">@Model.ElementAt(i).Email</small></p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
