@@ -1,0 +1,77 @@
+﻿@model ASPMicroSocialPlatform.Models.ApplicationUser
+
+@{
+    ViewBag.Title = "Edit User";
+}
+
+<h2 class="my-4">Edit User</h2>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit" asp-controller="Users" method="post" enctype="multipart/form-data">
+                <input asp-for="Id" type="hidden" />
+                <div class="form-group">
+                    <label asp-for="FirstName" class="control-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LastName" class="control-label"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Bio" class="control-label"></label>
+                    <textarea asp-for="Bio" class="form-control"></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ProfilePicture" class="control-label"></label>
+                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                    {
+                        <input type="hidden" name="ExistingProfilePicture" value="@Model.ProfilePicture" />
+                        <img id="previewImage" style="height:300px; width: auto;" src="@Model.ProfilePicture" class="card-img-top" alt="Profile Picture">
+                    }
+                    else
+                    {
+                        <img id="previewImage" style="display:none; height:300px; width: auto;" class="card-img-top" alt="Profile Picture">
+                    }
+                    <br />
+                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                    {
+                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Change Picture</label>
+                    }
+                    else
+                    {
+                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Upload Picture</label>
+                    }
+                    <input asp-for="ProfilePicture" id="ProfilePicture" style="visibility: hidden" type="file" onchange="previewFile()">
+                    <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewFile() {
+        var preview = document.getElementById('previewImage');
+        var file = document.getElementById('ProfilePicture').files[0];
+        var reader = new FileReader();
+        var changeImg = document.getElementById('changeImg');
+
+        reader.onloadend = function () {
+            preview.src = reader.result;
+            preview.style.display = "block";
+            changeImg.innerHTML = "Change Picture";
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "";
+        }
+    }
+</script>

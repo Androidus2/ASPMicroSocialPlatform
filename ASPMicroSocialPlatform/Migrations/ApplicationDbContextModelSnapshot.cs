@@ -50,6 +50,9 @@ namespace ASPMicroSocialPlatform.Migrations
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
+                    b.Property<bool?>("IsPrivate")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
