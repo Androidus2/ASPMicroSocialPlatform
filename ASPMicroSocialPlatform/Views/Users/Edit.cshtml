@@ -12,12 +12,12 @@
             <form asp-action="Edit" asp-controller="Users" method="post" enctype="multipart/form-data">
                 <input asp-for="Id" type="hidden" />
                 <div class="form-group">
-                    <label asp-for="FirstName" class="control-label"></label>
+                    <label asp-for="FirstName" class="control-label">Prenume:</label>
                     <input asp-for="FirstName" class="form-control" />
                     <span asp-validation-for="FirstName" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="LastName" class="control-label"></label>
+                    <label asp-for="LastName" class="control-label">Nume:</label>
                     <input asp-for="LastName" class="form-control" />
                     <span asp-validation-for="LastName" class="text-danger"></span>
                 </div>
@@ -40,14 +40,22 @@
                     <br />
                     @if (!string.IsNullOrEmpty(Model.ProfilePicture))
                     {
-                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Change Picture</label>
+                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Schimba Poza</label>
                     }
                     else
                     {
-                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Upload Picture</label>
+                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Incarca Poza</label>
                     }
                     <input asp-for="ProfilePicture" id="ProfilePicture" style="visibility: hidden" type="file" onchange="previewFile()">
                     <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="IsPrivate" class="control-label">Profile Privacy</label>
+                    <select asp-for="IsPrivate" class="form-control">
+                        <option value="False" selected>Public</option>
+                        <option value="True">Private</option>
+                    </select>
+                    <span asp-validation-for="IsPrivate" class="text-danger"></span>
                 </div>
                 <button type="submit" class="btn btn-primary">Update</button>
             </form>

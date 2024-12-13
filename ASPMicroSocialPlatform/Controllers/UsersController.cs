@@ -126,6 +126,7 @@ namespace ASPMicroSocialPlatform.Controllers
             userInDb.LastName = user.LastName;
             userInDb.Bio = user.Bio;
             userInDb.ProfilePicture = user.ProfilePicture;
+            userInDb.IsPrivate = user.IsPrivate;
 
             _context.SaveChanges();
 
