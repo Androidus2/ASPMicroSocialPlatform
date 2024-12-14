@@ -4,43 +4,81 @@
     ViewBag.Title = "User";
 }
 
-<h2 class="my-4">@Model.FirstName @Model.LastName</h2>
-
 <div class="container">
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <img src="@(!string.IsNullOrEmpty(Model.ProfilePicture) ? Model.ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="card-img-top" alt="User Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 1px solid #555;">
-                <div class="card-body">
-                    <h3 class="card-title">@Model.FirstName @Model.LastName</h3>
-                    <p class="card-text">@Model.Bio</p>
-                    <p class="card-text"><small class="text-muted">@Model.Email</small></p>
-                    <a href="@Url.Action("Edit", "Users", new { id = Model.Id })" class="btn btn-primary">Edit Profile</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    <div class="row my-4">
+        <div class="col-md-4 text-center">
+            <!-- Profile Picture and User Info -->
+            <img src="@(!string.IsNullOrEmpty(Model.ProfilePicture) ? Model.ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="rounded-circle img-fluid" alt="User Image" style="width: 150px; height: 150px; object-fit: cover; border: 1px solid #ccc;">
+            <h2 class="mt-3">@Model.FirstName @Model.LastName</h2>
+            <p class="text-muted">@Model.Email</p>
+            <p>@Model.Bio</p>
 
-@if(ViewBag.ShowPosts){
-    <h3 class="my-4">Posts</h3>
-    @foreach (var post in Model.Posts)
-    {
-        <div class="card my-2">
-            <div class="card-body">
-                <a href="@Url.Action("Show", "Posts", new { id = post.Id })">
-                    @if (post.Image != null)
-                    {
-                        <img src="@post.Image" class="card-img-top" alt="Post Image" style="width: 200px; height: 200px; object-fit: cover;">
-                    }
-                    <h5 class="card-title">@Html.Raw(post.Description)</h5>
-                    <p class="card-text"><small class="text-muted">@post.Date</small></p>
+            <!-- Follow/Unfollow Button -->
+            <div class="d-flex justify-content-center mt-3">
+                @if (ViewBag.FollowStatus == "Self")
+                {
+                    <a asp-action="Edit" asp-controller="Users" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                }
+                else if (ViewBag.FollowStatus == "Following")
+                {
+                    <form method="post" asp-action="Unfollow" asp-controller="Follow">
+                        <input type="hidden" name="followedId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Following</button>
+                    </form>
+                }
+                else if (ViewBag.FollowStatus == "Requested")
+                {
+                    <button class="btn btn-secondary btn-sm" disabled>Requested</button>
+                }
+                else
+                {
+                    <form method="post" asp-action="SendFollowRequest" asp-controller="Follow">
+                        <input type="hidden" name="followedId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary btn-sm">Follow</button>
+                    </form>
+                }
+            </div>
+
+            <!-- Followers and Following Links -->
+            <div class="text-center mt-2">
+                <a asp-action="Followers" asp-controller="Follow" asp-route-userId="@Model.Id" class="text-decoration-none">
+                    <strong>@(ViewBag.FollowersCount)</strong> Followers
+                </a>
+                <a asp-action="Following" asp-controller="Follow" asp-route-userId="@Model.Id" class="text-decoration-none ms-3">
+                    <strong>@(Model.Following?.Count ?? 0)</strong> Following
                 </a>
             </div>
         </div>
-    }
-}
-else
-{
-    <h3 class="my-4">This user's profile is private! Follow them to see their posts.</h3>
-}
+
+		<!-- User's Posts or Private Profile Message -->
+        <div class="col-md-8">
+            @if (ViewBag.ShowPosts == true)
+            {
+                <!-- Display Posts -->
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    @foreach (var post in Model.Posts)
+                    {
+                        <div class="col">
+                            <div class="card h-100 border-0">
+                                <a asp-action="Show" asp-controller="Posts" asp-route-id="@post.Id" class="text-decoration-none text-dark">
+                                    <img src="@(!string.IsNullOrEmpty(post.Image) ? post.Image : "/images/placeholder-image.jpg")" class="card-img-top" alt="Post Image" style="height: 250px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <p class="card-text">@Html.Raw(post.Description)</p>
+                                    </div>
+                                </a>
+                                <div class="card-footer bg-white border-0">
+                                    <small class="text-muted">@post.Date.ToString("MMM dd, yyyy")</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Private Profile Message -->
+                <h3 class="my-4 text-center">This user's profile is private. Follow them to see their posts.</h3>
+            }
+        </div>
+    </div>
+</div>

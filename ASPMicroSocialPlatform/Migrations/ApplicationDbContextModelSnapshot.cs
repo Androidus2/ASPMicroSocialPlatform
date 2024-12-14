@@ -151,6 +151,9 @@ namespace ASPMicroSocialPlatform.Migrations
                     b.Property<string>("FollowerId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id", "FollowedId", "FollowerId");
 
                     b.HasIndex("FollowedId");

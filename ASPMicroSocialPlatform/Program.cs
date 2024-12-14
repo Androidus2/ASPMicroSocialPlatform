@@ -48,6 +48,10 @@ app.UseAuthorization();
 app.MapControllerRoute(
 	name: "default",
 	pattern: "{controller=Posts}/{action=Index}/{id?}");
+
 app.MapRazorPages();
+
+
+
 
 app.Run();

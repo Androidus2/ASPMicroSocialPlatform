@@ -30,8 +30,15 @@ namespace ASPMicroSocialPlatform.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
-            // get all posts and include the user that posted them
-            var posts = _context.Posts.Include(p => p.User).ToList();
+            // get all posts and include the user that posted them alongisde comments for the count
+            var posts = _context.Posts
+				.Include(p => p.User)
+                .Include(p => p.Comments)
+                .ToList();
+
+
+            ViewBag.CurrentUserId = _userManager.GetUserId(User);
+
             return View(posts);
         }
 
@@ -137,6 +144,7 @@ namespace ASPMicroSocialPlatform.Controllers
 				TempData["messageType"] = "error";
 				return RedirectToAction("Index", "Posts");
 			}
+
 			return View(post);
 		}
 

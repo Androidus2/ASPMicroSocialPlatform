@@ -1,0 +1,75 @@
+﻿@model IEnumerable<ASPMicroSocialPlatform.Models.ApplicationUser>
+
+@{
+    ViewBag.Title = "Users";
+    string searchParam = ViewBag.SearchParam as string;
+}
+
+<h2 class="my-4">Users</h2>
+
+<div class="container">
+    <div class="row">
+        @foreach (var user in Model)
+        {
+            <partial name="_UserCard" model="user" />
+        }
+    </div>
+</div>
+
+
+
+@if (ViewBag.TotalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @if (ViewBag.CurrentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Search", new { page = ViewBag.CurrentPage - 1, search = searchParam })">Previous</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+            }
+
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                if (i == ViewBag.CurrentPage)
+                {
+                    <li class="page-item active">
+                        <span class="page-link">@i</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Search", new { page = i, search = searchParam })">@i</a>
+                    </li>
+                }
+            }
+
+            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Search", new { page = ViewBag.CurrentPage + 1, search = searchParam })">Next</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info" role="alert">
+        No users found.
+    </div>
+}

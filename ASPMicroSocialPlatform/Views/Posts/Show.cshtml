@@ -1,143 +1,135 @@
-﻿<!--
-	Get the model for a post and show its information (description and image) in a nice manner using bootstrap
--->
+﻿@model ASPMicroSocialPlatform.Models.Post
 
-@model ASPMicroSocialPlatform.Models.Post
+<!-- Main Post Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <!-- Post Header -->
+    <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex align-items-center">
+            <img src="@(!string.IsNullOrEmpty(Model.User.ProfilePicture) ? Model.User.ProfilePicture : "/images/MissingNo.png")"
+                 class="rounded-circle me-3"
+                 style="width: 40px; height: 40px; object-fit: cover;"
+                 alt="Profile Picture">
+            <div>
+                <h6 class="mb-0 fw-bold">@Model.User.UserName</h6>
+                <small class="text-muted">@Model.Date.ToString("MMM dd, yyyy")</small>
+            </div>
+        </div>
+    </div>
 
-<div class="card">
-	@if (!string.IsNullOrEmpty(Model.Image))
-	{
-		<img src="@Model.Image" style="height:500px; width: auto;" class="card-img-top" alt="...">
-	}
-	<div class="card-body">
-		<p class="card-text">@Html.Raw(Model.Description)</p>
-	</div>
-	<div class="card-footer">
-		<p class="card-text">Posted by: @Model.User.UserName</p>
-	</div>
+    <!-- Post Image -->
+    @if (!string.IsNullOrEmpty(Model.Image))
+    {
+        <div class="position-relative">
+            <img src="@Model.Image" class="w-100" style="max-height: 600px; object-fit: contain;" alt="Post Image">
+        </div>
+    }
+
+    <!-- Post Content -->
+    <div class="card-body">
+        <p class="card-text mb-3">@Html.Raw(Model.Description)</p>
+
+        <hr class="my-3">
+
+        <!-- Comments Section -->
+        <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-chat-left-text fs-5 me-2"></i>
+            <h6 class="mb-0">Comments (@Model.Comments.Count())</h6>
+        </div>
+
+        <!-- New Comment Form -->
+        <div class="mb-4">
+            <button class="btn btn-link text-decoration-none p-0 mb-3" onclick="toggleNewCommentForm()" id="newCommentButton">
+                <i class="bi bi-plus-circle me-2"></i>Add a comment
+            </button>
+
+            <div id="newCommentForm" style="display:none;" class="mt-3">
+                <form method="post" asp-controller="Posts" asp-action="AddComment">
+                    <input type="hidden" name="PostId" value="@Model.Id" />
+                    <div class="form-group">
+                        <textarea class="form-control border-0 bg-light"
+                                  name="Content"
+                                  id="Content"
+                                  rows="3"
+                                  style="resize: none"
+                                  placeholder="Write a comment..."></textarea>
+                        @if (TempData["ShowNewComment"] != null && TempData["NewCommentError"] != null)
+                        {
+                            <span class="text-danger small">@TempData["NewCommentError"]</span>
+                        }
+                    </div>
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm">Post</button>
+                        <button type="button" class="btn btn-link btn-sm text-muted" onclick="toggleNewCommentForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-section">
+            @foreach (var comment in Model.Comments)
+            {
+                <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                        <!-- Comment Edit Form -->
+                        <div id="editForm-@comment.Id" style="display:none;">
+                            <form method="post" asp-controller="Posts" asp-action="EditComment">
+                                <input type="hidden" name="Id" value="@comment.Id" />
+                                <input type="hidden" name="PostId" value="@Model.Id" />
+                                <input type="hidden" name="UserId" value="@comment.UserId" />
+                                <div class="form-group">
+                                    <textarea class="form-control border-0 bg-white"
+                                              name="Content"
+                                              rows="3"
+                                              style="resize: none">@(TempData["ShowEditComment"] != null && comment.Id == (int)TempData["ShowEditComment"] ? TempData["LastCommentContent"] : comment.Content)</textarea>
+                                    @if (TempData["ShowEditComment"] != null && comment.Id == (int)TempData["ShowEditComment"] && TempData["EditCommentError" + comment.Id] != null)
+                                    {
+                                        <span class="text-danger small">@TempData["EditCommentError" + comment.Id]</span>
+                                    }
+                                </div>
+                                <div class="mt-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                    <button type="button" class="btn btn-link btn-sm text-muted" onclick="toggleEditForm(@comment.Id)">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Comment Content -->
+                        <div id="commentContent-@comment.Id">
+                            <div class="d-flex mb-2">
+                                <img src="@(!string.IsNullOrEmpty(comment.User.ProfilePicture) ? comment.User.ProfilePicture : "/images/MissingNo.png")"
+                                     class="rounded-circle me-2"
+                                     style="width: 32px; height: 32px; object-fit: cover;"
+                                     alt="Profile Picture">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">@comment.User.UserName</h6>
+                                    <small class="text-muted">@comment.Date.ToString("MMM dd, yyyy")</small>
+                                </div>
+                            </div>
+
+                            <p class="mb-2 ms-5">@comment.Content</p>
+
+                            @if (User.IsInRole("Admin") || comment.UserId == ViewBag.CurrentUserId)
+                            {
+                                <div class="ms-5">
+                                    @if (comment.UserId == ViewBag.CurrentUserId)
+                                    {
+                                        <button class="btn btn-link btn-sm text-muted p-0 me-3" onclick="toggleEditForm(@comment.Id)">
+                                            <i class="bi bi-pencil-square me-1"></i>Edit
+                                        </button>
+                                    }
+                                    <a class="btn btn-link btn-sm text-danger p-0" href="/Posts/DeleteComment/@comment.Id">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>
-
-<br />
-<br />
-
-<div class="card">
-	<div class="card-body">
-		<button class="btn btn-primary" onclick="toggleNewCommentForm()" id="newCommentButton">Adauga comentariu</button>
-		
-		<div id="newCommentForm" style="display:none;">
-			<form method="post" asp-controller="Posts" asp-action="AddComment">
-				<input type="hidden" name="PostId" value="@Model.Id" />
-				<div class="form-group">
-					<label for="Content">Comentariu</label>
-					<textarea class="form-control" name="Content" id="Content" rows="5" style="resize: none"></textarea>
-					@if (TempData["ShowNewComment"] != null)
-					{
-						@* <span asp-validation-for="Description" class="text-danger"></span>
-						We cannot use asp-validation-for because we are not using a model for the form, so we need to use TempData to show the error message
-						*@
-						@if (TempData["NewCommentError"] != null){
-							<span class="text-danger">@TempData["NewCommentError"]</span>
-						}
-					}
-				</div>
-				<br />
-				<button type="submit" class="btn btn-primary">Salveaza</button>
-				<button type="button" class="btn btn-secondary" onclick="toggleNewCommentForm()">Anuleaza</button>
-			</form>
-		</div>
-
-		<hr />
-		<br />
-
-		<h3 class="card-title">Comentarii: @Enumerable.Count(Model.Comments)</h3>
-		@foreach (var comment in Model.Comments)
-		{
-			<div class="card">
-				<div class="card-body">
-					<div id="editForm-@comment.Id" style="display:none;">
-						<form method="post" asp-controller="Posts" asp-action="EditComment">
-							<input type="hidden" name="Id" value="@comment.Id" />
-							<input type="hidden" name="PostId" value="@Model.Id" />
-							<input type="hidden" name="UserId" value="@comment.UserId" />
-							<div class="form-group">
-								<h5 for="Content">Editare comentariu</h5>
-								@if (TempData["ShowEditComment"] != null && comment.Id == (int)TempData["ShowEditComment"])
-								{
-									<textarea class="form-control" name="Content" id="Content" rows="3" style="resize: none">@TempData["LastCommentContent"]</textarea>
-									@* <span asp-validation-for="Content" class="text-danger"></span>
-									We cannot use asp-validation-for because we are not using a model for the form, so we need to use TempData to show the error message
-									*@
-									@if (TempData["EditCommentError" + comment.Id] != null)
-									{
-										<span class="text-danger">@TempData["EditCommentError" + comment.Id]</span>
-									}
-								}
-								else
-								{
-									<textarea class="form-control" name="Content" id="Content" rows="3" style="resize: none">@comment.Content</textarea>
-								}
-							</div>
-							<br />
-							<button type="submit" class="btn btn-primary">Salveaza</button>
-							<button type="button" class="btn btn-secondary" onclick="toggleEditForm(@comment.Id)">Anuleaza</button>
-						</form>
-					</div>
-
-					<div id="commentContent-@comment.Id">
-						<div class="card-text">
-							@comment.Content
-						</div>
-
-						<div class="d-flex justify-content-between flex-row mt-5">
-							<div>
-								<i class="bi bi-person"> @comment.User.UserName </i>
-							</div>
-							<span class="px-1 align-content-center">
-								@comment.Date
-							</span>
-						</div>
-
-						<br />
-
-						@if (User.IsInRole("Admin") || comment.UserId == ViewBag.CurrentUserId)
-						{
-							<a class="btn btn-danger" href="/Posts/DeleteComment/@comment.Id">Stergere comentariu</a>
-						}
-						@if (comment.UserId == ViewBag.CurrentUserId)
-						{
-							<a class="btn btn-secondary" onclick="toggleEditForm(@comment.Id)">Editare comentariu</a>
-						}
-					</div>
-
-					@if (TempData["ShowEditComment"] != null && comment.Id == (int)TempData["ShowEditComment"])
-					{
-						<text>
-							<script>
-								function toggleEditForm(commentId) {
-									var editForm = document.getElementById('editForm-' + commentId);
-									var commentContent = document.getElementById('commentContent-' + commentId);
-									if (editForm.style.display === 'none') {
-										editForm.style.display = 'block';
-										commentContent.style.display = 'none';
-									}
-									else {
-										editForm.style.display = 'none';
-										commentContent.style.display = 'block';
-									}
-								}
-
-								toggleEditForm(@TempData["ShowEditComment"]);
-
-							</script>
-						</text>
-					}
-				</div>
-			</div>
-			<br />
-		}
-	</div>
-</div>
-
 
 <script>
 	function toggleEditForm(commentId) {

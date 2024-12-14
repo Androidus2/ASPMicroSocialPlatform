@@ -1,0 +1,57 @@
+﻿@model ASPMicroSocialPlatform.Models.ApplicationUser
+
+@{
+    // Provide a default value for ShowRemoveFollowerButton if it's not set
+    var showRemoveFollowerButton = ViewBag.ShowRemoveFollowerButton as bool? ?? false;
+    var showFollowRequestButtons = ViewBag.ShowFollowRequestButtons as bool? ?? false;
+    var showUnfollowButton = ViewBag.ShowUnfollowButton as bool? ?? false;
+}
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="row g-0 align-items-center">
+        <div class="col-auto">
+            <img src="@(!string.IsNullOrEmpty(Model.ProfilePicture) ? Model.ProfilePicture : Url.Content("~/images/MissingNo.png"))"
+                 class="rounded-circle img-fluid"
+                 alt="User Image"
+                 style="width: 100px; height: 100px; object-fit: cover; margin: 10px; border: 2px solid #ccc;">
+        </div>
+        <div class="col">
+            <div class="card-body p-2">
+                <h5 class="card-title mb-1">@Model.FirstName @Model.LastName</h5>
+                <p class="card-text mb-2" style="max-width: 300px;">@Model.Bio</p>
+                <p class="card-text"><small class="text-muted">@Model.Email</small></p>
+                <div class="d-flex align-items-center">
+                    <a href="@Url.Action("Show", "Users", new { id = Model.Id })" class="btn btn-outline-primary btn-sm me-2">View Profile</a>
+
+                    @if (showUnfollowButton) {
+                        <form method="post" asp-action="Unfollow" asp-controller="Follow" class="d-inline">
+                            <input type="hidden" name="followedId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Unfollow</button>
+                        </form>
+                    }
+
+                    @if (showRemoveFollowerButton)
+                    {
+                        <form method="post" asp-action="RemoveFollower" asp-controller="Follow" class="d-inline">
+                            <input type="hidden" name="followerId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Remove from your follows</button>
+                        </form>
+                    }
+
+                    @if (showFollowRequestButtons)
+                    {
+                        <form method="post" asp-action="AcceptFollowRequest" asp-controller="Follow" class="d-inline">
+							<input type="hidden" name="followerId" value="@Model.Id" />
+							<button type="submit" class="btn btn-primary btn-sm">Accept Follow Request</button>
+						</form>
+						<form method="post" asp-action="RejectFollowRequest" asp-controller="Follow" class="d-inline">
+							<input type="hidden" name="followerId" value="@Model.Id" />
+							<button type="submit" class="btn btn-danger btn-sm">Reject Follow Request</button>
+						</form>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

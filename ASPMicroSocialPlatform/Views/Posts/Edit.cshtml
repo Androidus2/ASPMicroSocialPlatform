@@ -1,62 +1,170 @@
 ﻿@model ASPMicroSocialPlatform.Models.Post
 
-<h2>Editeaza postarea</h2>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <!-- Header -->
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-pencil-square fs-4 me-2"></i>
+                        <h2 class="mb-0">Edit Post</h2>
+                    </div>
+                </div>
 
-<hr />
-<br />
+                <!-- Form Content -->
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <label asp-for="Id" style="display:none"></label>
 
-<form asp-action="Edit" method="post" enctype="multipart/form-data">
-    <label asp-for="Id" style="display:none"></label>
-    <div class="form-group">
-        <label asp-for="Description">Descriere:</label>
-        <textarea asp-for="Description" class="form-control">@Model.Description</textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
+                        <!-- Image Preview -->
+                        <div class="upload-section mb-4 text-center">
+                            @if (!string.IsNullOrEmpty(Model.Image))
+                            {
+                                <input type="hidden" name="ExistingImagePath" value="@Model.Image" />
+                                <div class="position-relative mb-3">
+                                    <img id="previewImage"
+                                         src="@Model.Image"
+                                         class="img-fluid rounded shadow-sm"
+                                         style="max-height: 400px; width: auto;"
+                                         alt="Post preview">
+                                </div>
+                            }
+                            else
+                            {
+                                <img id="previewImage"
+                                     class="img-fluid rounded shadow-sm mb-3"
+                                     style="display:none; max-height: 400px; width: auto;"
+                                     alt="Post preview">
+                            }
+
+                            <!-- Upload Box -->
+                            <div class="upload-box p-4 rounded bg-light border-2 border-dashed">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2"></i>
+                                <div class="mb-3">
+                                    @if (!string.IsNullOrEmpty(Model.Image))
+                                    {
+                                        <label asp-for="Image" class="btn btn-outline-primary px-4" id="changeImg">
+                                            <i class="bi bi-arrow-repeat me-2"></i>Change Image
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label asp-for="Image" class="btn btn-outline-primary px-4" id="changeImg">
+                                            <i class="bi bi-upload me-2"></i>Upload Image
+                                        </label>
+                                    }
+                                    <input asp-for="Image"
+                                           id="Image"
+                                           style="visibility: hidden; position: absolute;"
+                                           type="file"
+                                           onchange="previewFile()"
+                                           accept="image/*">
+                                </div>
+                                <small class="text-muted">Drag and drop or click to upload</small>
+                                <span asp-validation-for="Image" class="text-danger d-block mt-2"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group mb-4">
+                            <label asp-for="Description" class="form-label fw-bold mb-2">
+                                <i class="bi bi-text-paragraph me-2"></i>Description
+                            </label>
+                            <textarea asp-for="Description"
+                                      class="form-control border-0 bg-light"
+                                      style="resize: none; min-height: 120px;"
+                                      placeholder="Write a caption...">@Model.Description</textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check2-circle me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <br />
-    @if (!string.IsNullOrEmpty(Model.Image))
-    {
-        <input type="hidden" name="ExistingImagePath" value="@Model.Image" />
-        <img id="previewImage" style="height:300px; width: auto;" src="@Model.Image" class="card-img-top" alt="...">
-    }
-    else
-    {
-        <img id="previewImage" style="display:none; height:300px; width: auto;" class="card-img-top" alt="...">
-    }
-    <br />
-    <div class="form-group">
-        @if (!string.IsNullOrEmpty(Model.Image))
-        {
-            <label asp-for="Image" class="btn btn-primary" id="changeImg">Schimba Imaginea</label>
-        }
-        else
-        {
-            <label asp-for="Image" class="btn btn-primary" id="changeImg">Incarca Imaginea</label>
-        }
-        <input asp-for="Image" id="Image" style="visibility: hidden" type="file" onchange="previewFile()">
-        <span asp-validation-for="Image" class="text-danger"></span>
-    </div>
+</div>
 
-    <br />
-    <button type="submit" class="btn btn-primary">Editeaza</button>
-</form>
+<style>
+    .border-dashed {
+        border: 2px dashed #dee2e6;
+    }
+
+    .upload-box {
+        transition: all 0.3s ease;
+    }
+
+        .upload-box:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+</style>
 
 <script>
     function previewFile() {
-        var preview = document.querySelector('img');
+        var preview = document.querySelector('#previewImage');
         var file = document.querySelector('input[type=file]').files[0];
         var reader = new FileReader();
         var changeImg = document.getElementById('changeImg');
+        var uploadBox = preview.nextElementSibling;
 
         reader.onloadend = function () {
             preview.src = reader.result;
             preview.style.display = "block";
-            changeImg.innerHTML = "Schimba Imaginea";
+            changeImg.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Change Image';
+            // uploadBox.style.display = file ? "none" : "block";
         }
 
         if (file) {
             reader.readAsDataURL(file);
         } else {
             preview.src = "";
+            preview.style.display = "none";
+            uploadBox.style.display = "block";
         }
+    }
+
+    // Drag and drop functionality
+    const uploadBox = document.querySelector('.upload-box');
+    const fileInput = document.querySelector('#Image');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadBox.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadBox.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadBox.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        uploadBox.classList.add('bg-light');
+    }
+
+    function unhighlight(e) {
+        uploadBox.classList.remove('bg-light');
+    }
+
+    uploadBox.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const file = dt.files[0];
+        fileInput.files = dt.files;
+        previewFile();
     }
 </script>

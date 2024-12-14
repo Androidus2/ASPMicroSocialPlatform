@@ -32,38 +32,108 @@ namespace ASPMicroSocialPlatform.Controllers
 			return View(users);
 		}
 
-		[HttpGet]
+        [HttpGet]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Search(string search, int? page)
+        {
+            var users = _context.Users.AsQueryable();
+            string searchString = string.Empty;
+            ViewBag.SearchParam = search;
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                searchString = search.Trim();
+                users = users.Where(u =>
+                    u.FirstName.Contains(searchString) ||
+                    u.LastName.Contains(searchString) ||
+                    u.Email.Contains(searchString));
+            }
+
+            int pageSize = 9; // Number of users per page
+            int pageNumber = (page ?? 1);
+
+            int totalUsers = await users.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchString = searchString;
+
+            var usersList = await users
+                .OrderBy(u => u.FirstName)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return View(usersList);
+        }
+
+
+        [HttpGet]
 		[Authorize(Roles = "User,Admin")]
-		public IActionResult Show(string id)
+		public async Task<IActionResult> Show(string id)
 		{
             // get the user and include all of their posts only if the user has a public profile or
             // we are an admin or the user is the same as the one in the session or the user is following the 
             // user whose profile we are trying to access
 
             // load the user without the posts
-            var user = _context.Users
-                .Include(u => u.Followers)
-                .Include(u => u.Following)
-                .FirstOrDefault(u => u.Id == id);
+            var user = await _context.Users
+                .Include(u => u.Followers.Where(f => f.IsAccepted)) // Only accepted followers
+                .Include(u => u.Following.Where(f => f.IsAccepted)) // Only accepted following
+                .FirstOrDefaultAsync(u => u.Id == id);
 
-            // check if the user is private
+
+            // check if the user is private 
             if (user.IsPrivate == false || id == _userManager.GetUserId(User) || User.IsInRole("Admin") || user.Followers.Any(f => f.FollowerId == _userManager.GetUserId(User)))
             {
-                user = _context.Users
+                user = await _context.Users
                     .Include(u => u.Posts)
-                    .Include(u => u.Followers)
-                    .Include(u => u.Following)
-                    .FirstOrDefault(u => u.Id == id);
+                    .Include(u => u.Followers.Where(f => f.IsAccepted)) // Only accepted followers
+                    .Include(u => u.Following.Where(f => f.IsAccepted)) // Only accepted following
+                    .FirstOrDefaultAsync(u => u.Id == id);
                 ViewBag.ShowPosts = true;
             }
             else
             {
-                user = _context.Users
-                    .FirstOrDefault(u => u.Id == id);
+                user = await _context.Users
+					.Include(u => u.Followers.Where(f => f.IsAccepted)) // Only accepted followers
+					.Include(u => u.Following.Where(f => f.IsAccepted)) // Only accepted following
+					.FirstOrDefaultAsync(u => u.Id == id);
                 ViewBag.ShowPosts = false;
             }
 
-            return View(user);
+            // determine follow status
+            string followStatus = "NotFollowing";
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser.Id == user.Id)
+            {
+                followStatus = "Self";
+            }
+            else
+            {
+                var existingFollow = await _context.Follows
+                    .FirstOrDefaultAsync(f => f.FollowerId == currentUser.Id && f.FollowedId == user.Id);
+
+                if (existingFollow != null)
+                {
+                    followStatus = existingFollow.IsAccepted ? "Following" : "Requested";
+                }
+            }
+
+            ViewBag.FollowStatus = followStatus;
+
+            // user with only accepted followers
+            var followers = await _context.Follows
+                .Include(f => f.Follower)
+                .Where(f => f.FollowedId == id && f.IsAccepted)
+                .Select(f => f.Follower)
+                .ToListAsync();
+
+
+            ViewBag.FollowersCount = followers.Count;
+
+			return View(user);
 		}
 
 		[HttpGet]

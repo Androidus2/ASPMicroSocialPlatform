@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,61 +8,149 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ASPMicroSocialPlatform.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
-<body>
+<body class="bg-light">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ASPMicroSocialPlatform</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top border-bottom border-secondary">
+            <div class="container">
+                <!-- Left Section -->
+                <div class="d-flex align-items-center" style="flex: 1;">
+                    <a class="navbar-brand d-flex align-items-center me-4" asp-controller="Home" asp-action="Index">
+                        <!-- Will be an icon here -->
+                        <span class="fw-bold">MircoSocialPlatform</span>
+                    </a>
+
+                    <div class="navbar-collapse collapse">
+                        <ul class="navbar-nav">
+                            @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Posts" asp-action="Index">
+                                        <i class="bi bi-house-door me-1"></i>Feed
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Posts" asp-action="New">
+                                        <i class="bi bi-plus-square me-1"></i>New Post
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Users" asp-action="Index">
+                                        <i class="bi bi-people me-1"></i>Users
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Center Section (Search) -->
+                @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                {
+                    <div class="d-flex justify-content-center" style="flex: 1;">
+                        <form method="get" asp-action="Search" asp-controller="Users" class="w-75">
+                            <div class="input-group">
+                                <input type="text"
+                                       class="form-control form-control-sm bg-dark border-secondary text-light"
+                                       placeholder="Search users..."
+                                       name="search"
+                                       value="@ViewBag.SearchString">
+                                <button class="btn btn-outline-light btn-sm" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                }
+
+                <!-- Right Section -->
+                <div class="d-flex justify-content-end align-items-center" style="flex: 1;">
+                    @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                    {
+                        <a class="nav-link position-relative p-0 me-3" asp-controller="Follow" asp-action="FollowRequests">
+                            <i class="bi bi-envelope text-light" style="font-size: 1.5rem;"></i>
+                            @if (ViewBag.PendingFollowRequestsCount > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                      style="font-size: 0.6rem;">
+                                    @ViewBag.PendingFollowRequestsCount
+                                </span>
+                            }
+                        </a>
+                    }
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            <!--display any messages we have in TempData["message"] either an as error or succes based on TempData["messageType"]-->
+
+    <div class="container main-container">
+        <main role="main" class="py-4">
             @if (TempData["message"] != null)
-			{
-                @if (Convert.ToString(TempData["messageType"]) == "success")
-                {
-                    <div class="alert alert-success">
-                        @TempData["message"]
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-danger">
-                        @TempData["message"]
-                    </div>
-                }
-			}
+            {
+                <div class="alert alert-@(Convert.ToString(TempData["messageType"]) == "success" ? "success" : "danger")
+                            shadow-sm border-0 fade show"
+                     role="alert">
+                    <i class="bi bi-@(Convert.ToString(TempData["messageType"]) == "success" ? "check-circle" : "exclamation-circle") me-2"></i>
+                    @TempData["message"]
+                </div>
+            }
 
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer bg-dark text-light py-4">
         <div class="container">
-            &copy; 2024 - ASPMicroSocialPlatform - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="d-flex justify-content-between align-items-center">
+                <span>&copy; 2024 - SocialPlatform</span>
+                <a asp-controller="Home" asp-action="Privacy" class="text-light text-decoration-none">
+                    <i class="bi bi-shield-check me-1"></i>Privacy
+                </a>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    body {
+        padding-top: 4rem;
+    }
+
+    .navbar {
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    }
+
+    .nav-link {
+        transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+        opacity: 0.8;
+    }
+
+    .main-container {
+        min-height: calc(100vh - 180px);
+    }
+
+    .alert {
+        border-radius: 8px;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #6c757d;
+    }
+
+</style>

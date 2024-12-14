@@ -14,5 +14,7 @@ namespace ASPMicroSocialPlatform.Models
         public virtual ApplicationUser? Follower { get; set; }
 
         public virtual ApplicationUser? Followed { get; set; }
+
+        public bool IsAccepted { get; set; } = false;
     }
 }

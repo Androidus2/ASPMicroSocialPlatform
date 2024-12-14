@@ -1,85 +1,150 @@
 ﻿@model ASPMicroSocialPlatform.Models.ApplicationUser
 
 @{
-    ViewBag.Title = "Edit User";
+    ViewBag.Title = "Edit Profile";
 }
 
-<h2 class="my-4">Edit User</h2>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <!-- Header -->
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-gear fs-4 me-2"></i>
+                        <h2 class="mb-0">Edit Profile</h2>
+                    </div>
+                </div>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <form asp-action="Edit" asp-controller="Users" method="post" enctype="multipart/form-data">
-                <input asp-for="Id" type="hidden" />
-                <div class="form-group">
-                    <label asp-for="FirstName" class="control-label">Prenume:</label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                <!-- Form Content -->
+                <div class="card-body p-4">
+                    <form asp-action="Edit" asp-controller="Users" method="post" enctype="multipart/form-data">
+                        <input asp-for="Id" type="hidden" />
+
+                        <!-- Profile Picture -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <input type="hidden" name="ExistingProfilePicture" value="@Model.ProfilePicture" />
+                                <img id="previewImage"
+                                     src="@(!string.IsNullOrEmpty(Model.ProfilePicture) ? Model.ProfilePicture : "/images/MissingNo.png")"
+                                     class="rounded-circle shadow-sm"
+                                     style="width: 150px; height: 150px; object-fit: cover;"
+                                     alt="Profile Picture">
+
+                                <div class="upload-box position-absolute bottom-0 end-0">
+                                    <label asp-for="ProfilePicture" class="btn btn-light rounded-circle shadow-sm p-2" id="changeImg">
+                                        <i class="bi bi-camera-fill"></i>
+                                    </label>
+                                    <input asp-for="ProfilePicture"
+                                           id="ProfilePicture"
+                                           style="visibility: hidden; position: absolute;"
+                                           type="file"
+                                           onchange="previewFile()"
+                                           accept="image/*">
+                                </div>
+                            </div>
+                            <span asp-validation-for="ProfilePicture" class="text-danger d-block mt-2"></span>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FirstName" class="form-control bg-light" placeholder="First Name" />
+                                    <label asp-for="FirstName"><i class="bi bi-person me-2"></i>First Name</label>
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="LastName" class="form-control bg-light" placeholder="Last Name" />
+                                    <label asp-for="LastName"><i class="bi bi-person me-2"></i>Last Name</label>
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="Bio"
+                                              class="form-control bg-light"
+                                              placeholder="Bio"
+                                              style="height: 100px"></textarea>
+                                    <label asp-for="Bio"><i class="bi bi-journal-text me-2"></i>Bio</label>
+                                    <span asp-validation-for="Bio" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Privacy Settings -->
+                            <div class="col-12">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h5 class="mb-0">
+                                                    <i class="bi bi-lock me-2"></i>Private Profile
+                                                </h5>
+                                                <small class="text-muted">Only approved followers can see your posts</small>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <select asp-for="IsPrivate" class="form-select">
+                                                    <option value="False">Public</option>
+                                                    <option value="True">Private</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check2-circle me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label asp-for="LastName" class="control-label">Nume:</label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Bio" class="control-label"></label>
-                    <textarea asp-for="Bio" class="form-control"></textarea>
-                    <span asp-validation-for="Bio" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="ProfilePicture" class="control-label"></label>
-                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
-                    {
-                        <input type="hidden" name="ExistingProfilePicture" value="@Model.ProfilePicture" />
-                        <img id="previewImage" style="height:300px; width: auto;" src="@Model.ProfilePicture" class="card-img-top" alt="Profile Picture">
-                    }
-                    else
-                    {
-                        <img id="previewImage" style="display:none; height:300px; width: auto;" class="card-img-top" alt="Profile Picture">
-                    }
-                    <br />
-                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
-                    {
-                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Schimba Poza</label>
-                    }
-                    else
-                    {
-                        <label asp-for="ProfilePicture" class="btn btn-primary" id="changeImg">Incarca Poza</label>
-                    }
-                    <input asp-for="ProfilePicture" id="ProfilePicture" style="visibility: hidden" type="file" onchange="previewFile()">
-                    <span asp-validation-for="ProfilePicture" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="IsPrivate" class="control-label">Profile Privacy</label>
-                    <select asp-for="IsPrivate" class="form-control">
-                        <option value="False" selected>Public</option>
-                        <option value="True">Private</option>
-                    </select>
-                    <span asp-validation-for="IsPrivate" class="text-danger"></span>
-                </div>
-                <button type="submit" class="btn btn-primary">Update</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .upload-box {
+        transition: all 0.3s ease;
+    }
+
+        .upload-box:hover {
+            transform: scale(1.1);
+        }
+
+    .form-floating > label {
+        padding-left: 1.75rem;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
 
 <script>
     function previewFile() {
         var preview = document.getElementById('previewImage');
         var file = document.getElementById('ProfilePicture').files[0];
         var reader = new FileReader();
-        var changeImg = document.getElementById('changeImg');
 
         reader.onloadend = function () {
             preview.src = reader.result;
             preview.style.display = "block";
-            changeImg.innerHTML = "Change Picture";
         }
 
         if (file) {
             reader.readAsDataURL(file);
         } else {
-            preview.src = "";
+            preview.src = "@(!string.IsNullOrEmpty(Model.ProfilePicture) ? Model.ProfilePicture : "/images/MissingNo.png")";
         }
     }
 </script>

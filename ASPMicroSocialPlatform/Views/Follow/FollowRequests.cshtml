@@ -1,0 +1,22 @@
+﻿@model IEnumerable<ASPMicroSocialPlatform.Models.Follow>
+
+@{
+    ViewBag.Title = "Follow Requests";
+    ViewBag.ShowFollowRequestButtons = true;
+}
+
+<h2 class="mb-4">Pending Follow Requests</h2>
+
+@if (!Model.Any())
+{
+    <p>You have no pending follow requests.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var followRequest in Model)
+        {
+            <partial name="_UserCard" model="followRequest.Follower" />
+        }
+    </div>
+}
