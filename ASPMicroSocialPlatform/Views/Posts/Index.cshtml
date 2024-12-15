@@ -1,8 +1,7 @@
 ﻿@model IEnumerable<ASPMicroSocialPlatform.Models.Post>
 
 <div class="container py-4">
-    <h2 class="mb-4 fw-bold">Posts</h2>
-
+    <h2 class="mb-4 fw-bold"><i class="bi bi-file-text me-2"></i>Posts</h2>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var post in Model)
         {
@@ -16,7 +15,7 @@
                                  style="width: 32px; height: 32px; object-fit: cover;"
                                  alt="Profile Picture">
                             <div>
-                                <h6 class="mb-0 fw-bold">@post.User.UserName</h6>
+                                <h6 class="mb-0 fw-bold">@post.User.FirstName @post.User.LastName</h6>
                                 <small class="text-muted">@post.Date.ToString("MMM dd, yyyy")</small>
                             </div>
                         </div>

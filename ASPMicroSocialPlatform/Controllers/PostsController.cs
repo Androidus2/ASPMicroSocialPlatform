@@ -10,30 +10,32 @@ using System.Net.NetworkInformation;
 
 namespace ASPMicroSocialPlatform.Controllers
 {
-    public class PostsController : Controller
-    {
+	public class PostsController : Controller
+	{
 
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IWebHostEnvironment _env;
+		private readonly ApplicationDbContext _context;
+		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly RoleManager<IdentityRole> _roleManager;
+		private readonly IWebHostEnvironment _env;
 
-        public PostsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IWebHostEnvironment env)
-        {
-            _context = context;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _env = env;
-        }
+		public PostsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IWebHostEnvironment env)
+		{
+			_context = context;
+			_userManager = userManager;
+			_roleManager = roleManager;
+			_env = env;
+		}
 
-        [HttpGet]
-        [Authorize(Roles = "User,Admin")]
-        public IActionResult Index()
-        {
-            // get all posts and include the user that posted them alongisde comments for the count
-            var posts = _context.Posts
+		[HttpGet]
+		[Authorize(Roles = "User,Admin")]
+		public IActionResult Index()
+		{
+			// get all posts and include the user that posted them alongisde comments for the count
+			var posts = _context.Posts
 				.Include(p => p.User)
-                .Include(p => p.Comments)
+				.Include(p => p.Comments)
+				.Where(p => p.User.IsPrivate == false || p.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin") || 
+					_context.Follows.Any(f => f.FollowedId == p.UserId && f.FollowerId == _userManager.GetUserId(User) && f.IsAccepted == true))
                 .ToList();
 
 
@@ -52,6 +54,29 @@ namespace ASPMicroSocialPlatform.Controllers
                 .ThenInclude(c => c.User)
                 .Include(p => p.User)
                 .FirstOrDefault(p => p.Id == id);
+
+			// if the account is private and the logged in user is not following the person that posted the post, you cannot see the post
+			if (post == null)
+            {
+                TempData["message"] = "Postarea nu exista!";
+                TempData["messageType"] = "error";
+                return RedirectToAction("Index", "Posts");
+            }
+			
+			var user = _context.Users.FirstOrDefault(u => u.Id == post.UserId);
+
+			if (user != null && !User.IsInRole("Admin") &&
+				user.Id != _userManager.GetUserId(User) &&
+				user.IsPrivate == true && 
+				!_context.Follows.Any(f => f.FollowedId == user.Id &&
+				f.FollowerId == _userManager.GetUserId(User) && 
+				f.IsAccepted == true))
+            {
+                TempData["message"] = "Nu aveti dreptul sa vedeti aceasta postare!";
+                TempData["messageType"] = "error";
+                return RedirectToAction("Index", "Posts");
+            }
+
 			ViewBag.CurrentUserId = _userManager.GetUserId(User);
 			return View(post);
         }

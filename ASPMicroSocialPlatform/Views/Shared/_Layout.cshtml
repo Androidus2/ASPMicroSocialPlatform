@@ -126,6 +126,9 @@
 <style>
     body {
         padding-top: 4rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
 
     .navbar {
@@ -136,12 +139,18 @@
         transition: all 0.2s ease;
     }
 
-    .nav-link:hover {
-        opacity: 0.8;
-    }
+        .nav-link:hover {
+            opacity: 0.8;
+        }
 
     .main-container {
-        min-height: calc(100vh - 180px);
+        flex: 1 0 auto;
+        margin-bottom: 5.0rem; 
+    }
+
+    .footer {
+        padding: 1rem 0; 
+        flex-shrink: 0; 
     }
 
     .alert {
@@ -152,5 +161,4 @@
         box-shadow: none;
         border-color: #6c757d;
     }
-
 </style>
