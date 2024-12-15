@@ -10,7 +10,7 @@
                  style="width: 40px; height: 40px; object-fit: cover;"
                  alt="Profile Picture">
             <div>
-                <h6 class="mb-0 fw-bold">@Model.User.UserName</h6>
+                <h6 class="mb-0 fw-bold">@Model.User.LastName @Model.User.FirstName</h6>
                 <small class="text-muted">@Model.Date.ToString("MMM dd, yyyy")</small>
             </div>
         </div>
@@ -102,7 +102,7 @@
                                      style="width: 32px; height: 32px; object-fit: cover;"
                                      alt="Profile Picture">
                                 <div>
-                                    <h6 class="mb-0 fw-bold">@comment.User.UserName</h6>
+                                    <h6 class="mb-0 fw-bold">@comment.User.FirstName @comment.User.LastName</h6>
                                     <small class="text-muted">@comment.Date.ToString("MMM dd, yyyy")</small>
                                 </div>
                             </div>
