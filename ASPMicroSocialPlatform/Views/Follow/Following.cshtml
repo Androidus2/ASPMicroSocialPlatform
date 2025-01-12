@@ -5,18 +5,23 @@
     ViewBag.ShowUnfollowButton = (bool)ViewBag.isSelf;
 }
 
-<h2 class="mb-4">Follows</h2>
 
 @if (!Model.Any())
 {
-    <p>You are not following anyone yet.</p>
+    <h2>You are not following anyone yet.</h2>
 }
 else
 {
-    <div class="row">
-        @foreach (var user in Model)
-        {
-            <partial name="_UserCard" model="user" />
-        }
+    <div class="container py-5">
+        <h2 class="mb-4">
+            <i class="fas fa-users me-2"></i>Follows
+        </h2>
+
+        <div class="row g-4">
+            @foreach (var user in Model)
+            {
+                <partial name="_UserCard" model="user" />
+            }
+        </div>
     </div>
 }

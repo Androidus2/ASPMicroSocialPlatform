@@ -221,6 +221,8 @@ namespace ASPMicroSocialPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, GroupCreateModel model)
         {
+            // json for the model
+            Console.WriteLine("Model: " + JsonSerializer.Serialize(model));
             var selectedUsers = await _context.Users
                 .Where(u => model.SelectedUserIds.Contains(u.Id))
                 .ToListAsync();
@@ -264,7 +266,7 @@ namespace ASPMicroSocialPlatform.Controllers
                 group.UserGroups.Where(ug => usersToRemove.Contains(ug.UserId)));
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Show), new { id = group.Id });
+            return RedirectToAction(nameof(Index));
         }
 
         [Authorize]

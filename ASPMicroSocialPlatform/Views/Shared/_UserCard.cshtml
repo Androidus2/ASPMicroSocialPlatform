@@ -1,5 +1,12 @@
 ﻿@model ASPMicroSocialPlatform.Models.ApplicationUser
 
+@{
+    // Provide a default value for ShowRemoveFollowerButton if it's not set
+    var showRemoveFollowerButton = ViewBag.ShowRemoveFollowerButton as bool? ?? false;
+    var showFollowRequestButtons = ViewBag.ShowFollowRequestButtons as bool? ?? false;
+    var showUnfollowButton = ViewBag.ShowUnfollowButton as bool? ?? false;
+}
+
 <div class="col-12 col-md-6 col-lg-4">
     <div class="card user-card h-100">
         <div class="text-center">
@@ -32,6 +39,83 @@
                     </a>
                 </div>
             }
+
+            @if (showUnfollowButton)
+            {
+                <form method="post" asp-action="Unfollow" asp-controller="Follow" class="d-inline">
+                    <input type="hidden" name="followedId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Unfollow</button>
+                </form>
+            }
+
+            @if (showRemoveFollowerButton)
+            {
+                <form method="post" asp-action="RemoveFollower" asp-controller="Follow" class="d-inline">
+                    <input type="hidden" name="followerId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Remove from your follows</button>
+                </form>
+            }
+
+            @if (showFollowRequestButtons)
+            {
+                <form method="post" asp-action="AcceptFollowRequest" asp-controller="Follow" class="d-inline">
+                    <input type="hidden" name="followerId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-primary btn-sm">Accept Follow Request</button>
+                </form>
+                <form method="post" asp-action="RejectFollowRequest" asp-controller="Follow" class="d-inline">
+                    <input type="hidden" name="followerId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Reject Follow Request</button>
+                </form>
+            }
         </div>
     </div>
 </div>
+
+
+<style>
+    .user-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .user-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .profile-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 20px auto;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card-title a {
+        color: #2c3e50;
+        text-decoration: none;
+    }
+
+        .card-title a:hover {
+            color: #3498db;
+        }
+
+    .btn-custom {
+        border-radius: 20px;
+        padding: 8px 20px;
+        margin: 5px;
+        transition: all 0.3s;
+    }
+
+    .btn-edit {
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+</style>

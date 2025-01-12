@@ -223,8 +223,11 @@ namespace ASPMicroSocialPlatform.Controllers
 
             // delete user
             _context.Users.Remove(user);
+            _context.SaveChanges();
 
-            return View(user);
+
+            // return to home controller
+            return RedirectToAction("Index");
         }
 
 

@@ -46,31 +46,6 @@
         visibility: visible;
     }
 
-    .groups-overlay {
-        position: fixed;
-        left: 240px;
-        top: 0;
-        width: 300px;
-        height: 100vh;
-        transform: translateX(-100%);
-        z-index: 999;
-        visibility: hidden;
-    }
-
-    .groups-overlay.animate {
-        transition: transform 0.3s ease, visibility 0.3s ease;
-    }
-
-    .groups-overlay.active {
-        transform: translateX(0);
-        visibility: visible;
-    }
-
-    .group-item:hover {
-        background-color: rgba(255,255,255,0.1);
-        cursor: pointer;
-    }
-
 
     .sidebar-content {
         position: sticky;
@@ -125,6 +100,7 @@
     <title>@ViewData["Title"] - ASPMicroSocialPlatform</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="~/ASPMicroSocialPlatform.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
