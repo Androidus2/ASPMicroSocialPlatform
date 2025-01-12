@@ -13,7 +13,7 @@ namespace ASPMicroSocialPlatform.Models
         [Required]
         public string? Description { get; set; }
 
-        public virtual ICollection<ApplicationUser>? Users { get; set; }
+
         public virtual ICollection<Message>? Messages { get; set; }
         public virtual ICollection<UserGroup>? UserGroups { get; set; }
     }

@@ -1,0 +1,34 @@
+﻿@{
+    // _SearchBoxPartial.cshtml
+}
+
+
+<div class="mb-3">
+    <div class="input-group">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search users..." />
+        <button type="button" class="btn btn-primary" id="searchButton">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+</div>
+
+<div id="searchResults">
+    <!-- Results will be loaded here via AJAX -->
+</div>
+
+<script>
+    document.getElementById('searchButton').addEventListener('click', function () {
+        var searchQuery = document.getElementById('searchInput').value;
+
+        fetch(`@Url.Action("Search", "Groups")?search=${encodeURIComponent(searchQuery)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('searchResults').innerHTML = html;
+        })
+        .catch(error => console.error('Error fetching search results:', error));
+    });
+</script>

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<ASPMicroSocialPlatform.Models.Group>
+
+
+<div class="d-flex position-fixed start-230 top-0 bottom-0" style="width: 86vw; height: 100%">
+    <!-- Left Sidebar -->
+    <div class="border-end bg-white d-flex flex-column" style="width: 350px;">
+        <!-- Header - Sticky -->
+        <div class="p-3 border-bottom bg-white sticky-top">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Your Groups</h5>
+                <a asp-action="New" class="btn btn-sm btn-primary rounded-circle">
+                    <i class="bi bi-plus"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Scrollable Groups List -->
+        <div class="groups-list flex-grow-1" style="overflow-y: auto; height: calc(100vh - 60px);">
+            @if (!Model.Any())
+            {
+                <div class="text-center p-4">
+                    <i class="bi bi-people display-4 text-muted"></i>
+                    <p class="mt-3">No groups yet</p>
+                    <a asp-action="New" class="btn btn-sm btn-outline-primary">
+                        Create your first group
+                    </a>
+                </div>
+            }
+            else
+            {
+                foreach (var group in Model)
+                {
+                    <partial name="_GroupCard" model="group" />
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Right Content Area -->
+    <div class="flex-grow-1 bg-light">
+        @if (!Model.Any())
+        {
+            <div class="h-100 d-flex align-items-center justify-content-center">
+                <div class="text-center text-muted">
+                    <i class="bi bi-chat-square-text display-1 mb-3"></i>
+                    <h4>Select a group to view messages</h4>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div id="groupContent">
+                <!-- Group content will be loaded here -->
+                <!-- in site.js is the logic for that-->
+            </div>
+        }
+    </div>
+</div>
+
+
+<script>
+
+
+
+    function setInnerHTML(elm, html) {
+        elm.innerHTML = html;
+
+        Array.from(elm.querySelectorAll("script"))
+            .forEach(oldScriptEl => {
+                const newScriptEl = document.createElement("script");
+
+                Array.from(oldScriptEl.attributes).forEach(attr => {
+                    newScriptEl.setAttribute(attr.name, attr.value)
+                });
+
+                const scriptText = document.createTextNode(oldScriptEl.innerHTML);
+                newScriptEl.appendChild(scriptText);
+
+                oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
+            });
+    }
+
+    function loadGroup(Id) {
+		groupId = Id;
+        fetch(`/Groups/Show/${Id}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            var element = document.getElementById('groupContent');
+            setInnerHTML(element, html);
+
+            // Update active state
+            document.querySelectorAll('.group-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href').includes(Id)) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    }
+
+
+
+</script>
+

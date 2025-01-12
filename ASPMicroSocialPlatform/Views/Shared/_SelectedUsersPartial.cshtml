@@ -1,0 +1,19 @@
+﻿@model GroupCreateModel
+
+<div class="selected-users mt-3">
+    @foreach (var userId in Model.SelectedUserIds)
+    {
+        var user = Model.SelectedUsers.FirstOrDefault(u => u.Id == userId);
+        if (user != null)
+        {
+            <div class="badge bg-primary m-1">
+                <img src="@(!string.IsNullOrEmpty(@user.ProfilePicture) ? @user.ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="rounded-circle img-fluid" alt="User Image" style="width: 30px; height: 30px; object-fit: cover; border: 1px solid #ccc;">
+                @user.FirstName @user.LastName
+                <input type="hidden" name="SelectedUserIds" value="@userId" />
+                <button type="button" class="btn-close btn-close-white"
+                        onclick="removeUser('@userId')"
+                        aria-label="Remove user"></button>
+            </div>
+        }
+    }
+</div>

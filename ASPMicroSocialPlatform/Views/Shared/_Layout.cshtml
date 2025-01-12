@@ -1,4 +1,122 @@
-﻿
+﻿<style>
+    body {
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        width: 240px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .main-content {
+        margin-left: 240px;
+        min-height: 100vh;
+    }
+
+    /*     .nav-link {
+                padding: 0.8rem 1rem;
+                transition: all 0.2s ease;
+            } */
+
+    .nav-link:hover {
+        background-color: rgba(255,255,255,0.1);
+    }
+
+    .search-overlay {
+        position: fixed;
+        left: 240px;
+        top: 0;
+        width: 300px;
+        height: 100vh;
+        transform: translateX(-100%);
+        z-index: 999;
+        visibility: hidden;
+    }
+
+    .search-overlay.animate {
+        transition: transform 0.3s ease, visibility 0.3s ease;
+    }
+
+    .search-overlay.active {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .groups-overlay {
+        position: fixed;
+        left: 240px;
+        top: 0;
+        width: 300px;
+        height: 100vh;
+        transform: translateX(-100%);
+        z-index: 999;
+        visibility: hidden;
+    }
+
+    .groups-overlay.animate {
+        transition: transform 0.3s ease, visibility 0.3s ease;
+    }
+
+    .groups-overlay.active {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .group-item:hover {
+        background-color: rgba(255,255,255,0.1);
+        cursor: pointer;
+    }
+
+
+    .sidebar-content {
+        position: sticky;
+        top: 0;
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchToggle = document.querySelector('.search-toggle');
+        const searchOverlay = document.querySelector('.search-overlay');
+
+        const sidebar = document.querySelector('.sidebar');
+
+        // this is done so that the animation for the sidebar does not happen on every refresh
+        requestAnimationFrame(() => {
+            searchOverlay.classList.add('animate');
+        });
+
+
+        searchToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            searchOverlay.classList.toggle('active');
+        });
+
+        /*
+        groupsToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            groupsOverlay.classList.toggle('active');
+
+        });
+        */
+
+        document.addEventListener('click', function (e) {
+            if (!searchOverlay.contains(e.target) && !searchToggle.contains(e.target)) {
+                searchOverlay.classList.remove('active');
+            }
+        });
+    });
+</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,112 +127,134 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ASPMicroSocialPlatform.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
 </head>
 <body class="bg-light">
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top border-bottom border-secondary">
-            <div class="container">
-                <!-- Left Section -->
-                <div class="d-flex align-items-center" style="flex: 1;">
-                    <a class="navbar-brand d-flex align-items-center me-4" asp-controller="Home" asp-action="Index">
-                        <!-- Will be an icon here -->
-                        <span class="fw-bold">MicroSocialPlatform</span>
-                    </a>
-
-                    <div class="navbar-collapse collapse">
-                        <ul class="navbar-nav">
-                            @if (User.IsInRole("Admin") || User.IsInRole("User"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Posts" asp-action="Index">
-                                        <i class="bi bi-house-door me-1"></i>Feed
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Posts" asp-action="New">
-                                        <i class="bi bi-plus-square me-1"></i>New Post
-                                    </a>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Users" asp-action="Index">
-                                        <i class="bi bi-people me-1"></i>Users
-                                    </a>
-                                </li>
-                            }
-                        </ul>
+    <div class="d-flex">
+        <!-- Left Sidebar -->
+        <nav class="sidebar bg-dark">
+            <div class="sidebar-content d-flex flex-column justify-content-between h-100">
+                <!-- Top Section -->
+                <div>
+                    <div class="py-4 px-3">
+                        <a class="navbar-brand text-light d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                            <span class="fw-bold">Micro Social Platform</span>
+                        </a>
                     </div>
+
+                    <ul class="nav flex-column">
+                        @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Posts" asp-action="Index">
+                                    <i class="bi bi-house-door"></i>
+                                    <span class="ms-3">Feed</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Posts" asp-action="New">
+                                    <i class="bi bi-plus-square"></i>
+                                    <span class="ms-3">Create</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light search-toggle">
+                                    <i class="bi bi-search"></i>
+                                    <span class="ms-3">Search</span>
+                                </a>
+                            </li>
+                            <!-- Add this after the search-toggle nav item -->
+                            <li class="nav-item">
+                                <a class="nav-link text-light groups-toggle" asp-controller="Groups" asp-action="Index">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span class="ms-3">Groups</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item position-relative">
+                                <a class="nav-link text-light" asp-controller="Follow" asp-action="FollowRequests">
+                                    <i class="bi bi-envelope"></i>
+                                    <span class="ms-3">Messages</span>
+                                    @if (ViewBag.PendingFollowRequestsCount > 0)
+                                    {
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            @ViewBag.PendingFollowRequestsCount
+                                        </span>
+                                    }
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Users" asp-action="Index">
+                                    <i class="bi bi-people"></i>
+                                    <span class="ms-3">Users</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </div>
 
-                <!-- Center Section (Search) -->
-                @if (User.IsInRole("Admin") || User.IsInRole("User"))
-                {
-                    <div class="d-flex justify-content-center" style="flex: 1;">
-                        <form method="get" asp-action="Search" asp-controller="Users" class="w-75">
-                            <div class="input-group">
-                                <input type="text"
-                                       class="form-control form-control-sm bg-dark border-secondary text-light"
-                                       placeholder="Search users..."
-                                       name="search"
-                                       value="@ViewBag.SearchString">
-                                <button class="btn btn-outline-light btn-sm" type="submit">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </form>
+                <!-- Bottom Section -->
+                <div class="sidebar-footer">
+                    <div class="px-3 py-2">
+                        <partial name="_LoginPartial" />
                     </div>
-                }
-
-                <!-- Right Section -->
-                <div class="d-flex justify-content-end align-items-center" style="flex: 1;">
-                    @if (User.IsInRole("Admin") || User.IsInRole("User"))
-                    {
-                        <a class="nav-link position-relative p-0 me-3" asp-controller="Follow" asp-action="FollowRequests">
-                            <i class="bi bi-envelope text-light" style="font-size: 1.5rem;"></i>
-                            @if (ViewBag.PendingFollowRequestsCount > 0)
-                            {
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                      style="font-size: 0.6rem;">
-                                    @ViewBag.PendingFollowRequestsCount
-                                </span>
-                            }
+                    <div class="border-top border-secondary px-3 py-2">
+                        <small class="text-light">&copy; 2024 Micro Social Platform</small>
+                        <a asp-controller="Home" asp-action="Privacy" class="text-light text-decoration-none d-block">
+                            <small><i class="bi bi-shield-check"></i> Privacy</small>
                         </a>
-                    }
-                    <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </nav>
-    </header>
 
-    <div class="container main-container">
-        <main role="main" class="py-4">
-            @if (TempData["message"] != null)
-            {
-                <div class="alert alert-@(Convert.ToString(TempData["messageType"]) == "success" ? "success" : "danger")
-                            shadow-sm border-0 fade show"
-                     role="alert">
-                    <i class="bi bi-@(Convert.ToString(TempData["messageType"]) == "success" ? "check-circle" : "exclamation-circle") me-2"></i>
-                    @TempData["message"]
+        <!-- Search Overlay -->
+        <div class="search-overlay bg-dark p-3">
+            <form method="get" asp-action="Search" asp-controller="Users">
+                <div class="input-group">
+                    <input type="text"
+                           class="form-control bg-dark border-secondary text-light"
+                           placeholder="Search users..."
+                           name="search"
+                           value="@ViewBag.SearchString">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
-            }
-
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="footer bg-dark text-light py-4">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <span>&copy; 2024 - SocialPlatform</span>
-                <a asp-controller="Home" asp-action="Privacy" class="text-light text-decoration-none">
-                    <i class="bi bi-shield-check me-1"></i>Privacy
-                </a>
-            </div>
+            </form>
         </div>
-    </footer>
+
+        <!-- Groups Overlay -->
+@*         <div class="groups-overlay bg-dark p-3">
+            <div id="groupsContent">
+                <div class="groups-overlay bg-dark p-3">
+                </div>
+            </div>
+        </div> *@
+
+
+        <!-- Main Content -->
+        <div class="main-content flex-grow-1">
+            <main role="main" class="py-4 px-4">
+                @if (TempData["message"] != null)
+                {
+                    <div class="alert alert-@(Convert.ToString(TempData["messageType"]) == "success" ? "success" : "danger")
+                                shadow-sm border-0 fade show"
+                         role="alert">
+                        <i class="bi bi-@(Convert.ToString(TempData["messageType"]) == "success" ? "check-circle" : "exclamation-circle") me-2"></i>
+                        @TempData["message"]
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -123,42 +263,4 @@
 </body>
 </html>
 
-<style>
-    body {
-        padding-top: 4rem;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
 
-    .navbar {
-        box-shadow: 0 2px 4px rgba(0,0,0,.1);
-    }
-
-    .nav-link {
-        transition: all 0.2s ease;
-    }
-
-        .nav-link:hover {
-            opacity: 0.8;
-        }
-
-    .main-container {
-        flex: 1 0 auto;
-        margin-bottom: 5.0rem; 
-    }
-
-    .footer {
-        padding: 1rem 0; 
-        flex-shrink: 0; 
-    }
-
-    .alert {
-        border-radius: 8px;
-    }
-
-    .form-control:focus {
-        box-shadow: none;
-        border-color: #6c757d;
-    }
-</style>

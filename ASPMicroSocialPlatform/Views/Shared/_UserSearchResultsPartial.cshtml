@@ -1,0 +1,15 @@
+﻿@{
+    // _UserSearchResultsPartial.cshtml
+}
+
+@model IEnumerable<ApplicationUser>
+
+<div class="list-group mt-2">
+    @foreach (var user in Model)
+    {
+        <button type="button" class="list-group-item list-group-item-action" onclick="addUser('@user.Id')">
+            <img src="@(!string.IsNullOrEmpty(@user.ProfilePicture) ? @user.ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="rounded-circle img-fluid" alt="User Image" style="width: 30px; height: 30px; object-fit: cover; border: 1px solid #ccc;">
+            @user.FirstName @user.LastName
+        </button>
+    }
+</div>
