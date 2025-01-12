@@ -12,6 +12,7 @@ namespace ASPMicroSocialPlatform.Data
         public DbSet<Follow> Follows { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<Like> Likes { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 			: base(options)
@@ -49,6 +50,17 @@ namespace ASPMicroSocialPlatform.Data
                 .HasOne(ab => ab.Followed)
                 .WithMany(ab => ab.Followers)
                 .HasForeignKey(ab => ab.FollowedId);
+            
+            modelBuilder.Entity<Like>()
+                .HasKey(ab => new { ab.Id, ab.PostId, ab.UserId });
+            modelBuilder.Entity<Like>()
+                .HasOne(ab => ab.User)
+                .WithMany(ab => ab.Likes)
+                .HasForeignKey(ab => ab.UserId);
+            modelBuilder.Entity<Like>()
+                .HasOne(ab => ab.Post)
+                .WithMany(ab => ab.Likes)
+                .HasForeignKey(ab => ab.PostId);
 
         }
 

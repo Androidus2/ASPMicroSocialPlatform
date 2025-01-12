@@ -4,6 +4,7 @@ using ASPMicroSocialPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPMicroSocialPlatform.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250111145039_Likes2")]
+    partial class Likes2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,6 +49,9 @@ namespace ASPMicroSocialPlatform.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("IsPrivate")
                         .HasColumnType("bit");
@@ -90,6 +96,8 @@ namespace ASPMicroSocialPlatform.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -217,9 +225,6 @@ namespace ASPMicroSocialPlatform.Migrations
                     b.Property<int?>("GroupId")
                         .IsRequired()
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -425,6 +430,13 @@ namespace ASPMicroSocialPlatform.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ASPMicroSocialPlatform.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("ASPMicroSocialPlatform.Models.Group", null)
+                        .WithMany("Users")
+                        .HasForeignKey("GroupId");
+                });
+
             modelBuilder.Entity("ASPMicroSocialPlatform.Models.Comment", b =>
                 {
                     b.HasOne("ASPMicroSocialPlatform.Models.Post", "Post")
@@ -598,6 +610,8 @@ namespace ASPMicroSocialPlatform.Migrations
                     b.Navigation("Messages");
 
                     b.Navigation("UserGroups");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("ASPMicroSocialPlatform.Models.Post", b =>

@@ -9,16 +9,20 @@ namespace ASPMicroSocialPlatform.Controllers
 {
 	public class HomeController : Controller
 	{
-		private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _env;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
-		{
-			_logger = logger;
+        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IWebHostEnvironment env, ILogger<HomeController> logger)
+        {
             _context = context;
             _userManager = userManager;
-		}
+            _roleManager = roleManager;
+            _env = env;
+            _logger = logger;
+        }
 
         public async Task<IActionResult> Index()
         {
@@ -37,7 +41,6 @@ namespace ASPMicroSocialPlatform.Controllers
             {
                 ViewBag.PendingFollowRequestsCount = 0;
             }
-
             return View();
         }
 

@@ -20,6 +20,8 @@ namespace ASPMicroSocialPlatform.Models
 
         public virtual ICollection<Comment>? Comments { get; set; }
 
+        public virtual ICollection<Like>? Likes { get; set; }
+
         public virtual ICollection<UserGroup>? UserGroups { get; set; }
 
         public virtual ICollection<Follow>? Followers { get; set; }
