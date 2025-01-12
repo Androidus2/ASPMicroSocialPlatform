@@ -25,7 +25,7 @@ namespace ASPMicroSocialPlatform.Controllers
 		}
 
 		[HttpGet]
-		[Authorize(Roles= "User,Admin")]
+		[Authorize(Roles= "Admin")]
 		public IActionResult Index()
 		{
 			var users = _context.Users.ToList();
@@ -205,5 +205,28 @@ namespace ASPMicroSocialPlatform.Controllers
             return RedirectToAction("Show", new { id = user.Id });
 		}
 
-	}
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(string id)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+
+            if (user == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost gasit!";
+                TempData["messageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            TempData["message"] = "Utilizatorul a fost sters!";
+            TempData["messageType"] = "success";
+
+            // delete user
+            _context.Users.Remove(user);
+
+            return View(user);
+        }
+
+
+    }
 }

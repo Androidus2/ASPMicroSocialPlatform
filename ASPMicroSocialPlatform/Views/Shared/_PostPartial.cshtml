@@ -1,0 +1,79 @@
+﻿@model ASPMicroSocialPlatform.Models.Post
+
+<div class="col">
+    <div class="card h-100 border-0 shadow-sm hover-shadow transition cursor-pointer"
+         onclick="window.location.href='@Url.Action("Show", "Posts", new { id = Model.Id })'">
+        <!-- Post Header -->
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex align-items-center">
+                <a href="@Url.Action("Show", "Users", new { id = Model.UserId })"
+                   class="text-decoration-none"
+                   onclick="event.stopPropagation();">
+                    <img src="@(!string.IsNullOrEmpty(Model.User.ProfilePicture) ? Model.User.ProfilePicture : "/images/MissingNo.png")"
+                         class="rounded-circle me-2"
+                         style="width: 32px; height: 32px; object-fit: cover;"
+                         alt="Profile Picture">
+                </a>
+                <div>
+                    <a href="@Url.Action("Show", "Users", new { id = Model.UserId })"
+                       class="text-decoration-none"
+                       onclick="event.stopPropagation();">
+                        <h6 class="mb-0 fw-bold text-dark user-name">@Model.User.FirstName @Model.User.LastName</h6>
+                    </a>
+                    <small class="text-muted">@Model.Date.ToString("MMM dd, yyyy")</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="position-relative">
+            <img src="@(!string.IsNullOrEmpty(Model.Image) ? Model.Image : "/images/placeholder-image.jpg")"
+                 class="card-img-top"
+                 style="height: 300px; object-fit: cover;"
+                 alt="No Image">
+        </div>
+
+        <!-- Post Content -->
+        <div class="card-body">
+            <p class="card-text text-truncate mb-2">@Html.Raw(Model.Description)</p>
+
+            <!-- Post Actions -->
+            <div class="d-flex align-items-center justify-content-between mt-3">
+                <div class="d-flex gap-2">
+                    @if (User.Identity.IsAuthenticated && ((User.IsInRole("Admin") || Model.UserId == ViewBag.CurrentUserId)))
+                    {
+                        @if (Model.UserId == ViewBag.CurrentUserId)
+                        {
+                            <a asp-controller="Posts" asp-action="Edit" asp-route-id="@Model.Id"
+                               class="btn btn-sm btn-primary"
+                               onclick="event.stopPropagation();">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                        }
+                        <a asp-controller="Posts" asp-action="Delete" asp-route-id="@Model.Id"
+                           class="btn btn-sm btn-danger"
+                           onclick="event.stopPropagation();">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </a>
+                    }
+                </div>
+
+                <!-- Likes and Comments-->
+                <div>
+                    <!-- Likes Count -->
+                    <small class="text-muted me-3">
+                        <i class="bi bi-heart me-1"></i>
+                        @(Model.Likes?.Count() ?? 0)
+                    </small>
+
+                    <!-- Comments Count -->
+                    <small class="text-muted">
+                        <i class="bi bi-chat-left-text me-1"></i>
+                        @(Model.Comments?.Count() ?? 0)
+                    </small>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>

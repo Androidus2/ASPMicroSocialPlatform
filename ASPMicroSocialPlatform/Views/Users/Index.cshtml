@@ -1,32 +1,99 @@
-﻿@*
-    Show all users
-*@
-
-@model IEnumerable<ASPMicroSocialPlatform.Models.ApplicationUser>
+﻿@model IEnumerable<ASPMicroSocialPlatform.Models.ApplicationUser>
 
 @{
     ViewBag.Title = "Users";
 }
 
-<h2 class="my-4">Users</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div class="container">
-    <div class="row">
-        @for (var i = 0; i < Model.Count(); i++)
+<style>
+    .user-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .user-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .profile-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 20px auto;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card-title a {
+        color: #2c3e50;
+        text-decoration: none;
+    }
+
+        .card-title a:hover {
+            color: #3498db;
+        }
+
+    .btn-custom {
+        border-radius: 20px;
+        padding: 8px 20px;
+        margin: 5px;
+        transition: all 0.3s;
+    }
+
+    .btn-edit {
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+</style>
+
+<div class="container py-5">
+    <h2 class="mb-4">
+        <i class="fas fa-users me-2"></i>Users Directory
+    </h2>
+
+    <div class="row g-4">
+        @foreach (var user in Model)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="@(!string.IsNullOrEmpty(Model.ElementAt(i).ProfilePicture) ? Model.ElementAt(i).ProfilePicture : Url.Content("~/images/MissingNo.png"))" class="card-img-top" alt="User Image" style="width: 100px; height: 100px; object-fit: cover;">
-                    <div class="card-body">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card user-card h-100">
+                    <div class="text-center">
+                        <img src="@(!string.IsNullOrEmpty(user.ProfilePicture) ? user.ProfilePicture : Url.Content("~/images/MissingNo.png"))"
+                             class="profile-image" alt="@user.FirstName's profile picture">
+                    </div>
+                    <div class="card-body text-center">
                         <h3 class="card-title">
-                            <a href="@Url.Action("Show", "Users", new { id = Model.ElementAt(i).Id })">@Model.ElementAt(i).FirstName @Model.ElementAt(i).LastName</a>
+                            <a href="@Url.Action("Show", "Users", new { id = user.Id })">
+                                <i class="fas fa-user me-2"></i>@user.FirstName @user.LastName
+                            </a>
                         </h3>
-                        <p class="card-text">@Model.ElementAt(i).Bio</p>
-                        <p class="card-text"><small class="text-muted">@Model.ElementAt(i).Email</small></p>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-quote-left fa-sm me-2"></i>@(string.IsNullOrEmpty(user.Bio) ? "No bio available" : user.Bio)
+                        </p>
+                        <p class="card-text">
+                            <i class="fas fa-envelope me-2"></i>
+                            <small class="text-muted">@user.Email</small>
+                        </p>
+                        <div class="mt-3">
+                            <a href="@Url.Action("Edit", "Users", new { id = user.Id })"
+                               class="btn btn-custom btn-edit text-white">
+                                <i class="fas fa-edit me-2"></i>Edit
+                            </a>
+                            <a href="@Url.Action("Delete", "Users", new { id = user.Id })"
+                               class="btn btn-custom btn-delete text-white">
+                                <i class="fas fa-trash-alt me-2"></i>Delete
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         }
     </div>
 </div>
-

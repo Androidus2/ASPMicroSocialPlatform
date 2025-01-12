@@ -30,11 +30,33 @@
 
         <hr class="my-3">
 
-        <!-- Comments Section -->
+        <!-- Likes and Comments Section -->
         <div class="d-flex align-items-center mb-3">
-            <i class="bi bi-chat-left-text fs-5 me-2"></i>
-            <h6 class="mb-0">Comments (@Model.Comments.Count())</h6>
+            <!-- Likes Section -->
+            <div class="d-flex align-items-center me-4">
+                <form method="post" asp-controller="Like" asp-action="LikePost" class="d-flex align-items-center">
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-link p-0">
+                        @if (TempData["IsLiked"] != null && (bool)TempData["IsLiked"])
+                        {
+                            <i class="bi bi-heart-fill fs-5 me-2 text-danger"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-heart fs-5 me-2"></i>
+                        }
+                    </button>
+                </form>
+                <h6 class="mb-0">@Model.Likes.Count()</h6>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="d-flex align-items-center">
+                <i class="bi bi-chat-left-text fs-5 me-2"></i>
+                <h6 class="mb-0">@Model.Comments.Count()</h6>
+            </div>
         </div>
+
 
         <!-- New Comment Form -->
         <div class="mb-4">

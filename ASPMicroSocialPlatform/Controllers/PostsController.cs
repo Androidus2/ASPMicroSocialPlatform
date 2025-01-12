@@ -33,7 +33,8 @@ namespace ASPMicroSocialPlatform.Controllers
 			// get all posts and include the user that posted them alongisde comments for the count
 			var posts = _context.Posts
 				.Include(p => p.User)
-				.Include(p => p.Comments)
+				.Include(p => p.Likes)
+                .Include(p => p.Comments)
 				.Where(p => p.User.IsPrivate == false || p.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin") || 
 					_context.Follows.Any(f => f.FollowedId == p.UserId && f.FollowerId == _userManager.GetUserId(User) && f.IsAccepted == true))
                 .ToList();
@@ -41,6 +42,25 @@ namespace ASPMicroSocialPlatform.Controllers
 
             ViewBag.CurrentUserId = _userManager.GetUserId(User);
 
+            return View(posts);
+        }
+
+		[HttpGet]
+        [Authorize(Roles = "User,Admin")]
+		public async Task<IActionResult> HomePage()
+		{
+            // Get all posts from the people you follow in the order of creation
+            var user = await _userManager.GetUserAsync(User);
+			Console.WriteLine("User id: " + user.Id);
+            var posts = _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
+                .Where(p => _context.Follows.Any(f => f.FollowedId == p.UserId && f.FollowerId == user.Id && f.IsAccepted == true))
+                .OrderByDescending(p => p.Date)
+                .ToList();
+
+            // Go to Index with the posts
             return View(posts);
         }
 
@@ -53,6 +73,7 @@ namespace ASPMicroSocialPlatform.Controllers
                 .Include(p => p.Comments)
                 .ThenInclude(c => c.User)
                 .Include(p => p.User)
+				.Include(p => p.Likes)
                 .FirstOrDefault(p => p.Id == id);
 
 			// if the account is private and the logged in user is not following the person that posted the post, you cannot see the post
@@ -77,7 +98,14 @@ namespace ASPMicroSocialPlatform.Controllers
                 return RedirectToAction("Index", "Posts");
             }
 
-			ViewBag.CurrentUserId = _userManager.GetUserId(User);
+			// Check if the post is liked by the current user
+			TempData["IsLiked"] = false;
+            if (_userManager.GetUserId(User) != null)
+            {
+				TempData["IsLiked"] = _context.Likes.Any(l => l.UserId == _userManager.GetUserId(User) && l.PostId == id);
+            }
+
+            ViewBag.CurrentUserId = _userManager.GetUserId(User);
 			return View(post);
         }
 
