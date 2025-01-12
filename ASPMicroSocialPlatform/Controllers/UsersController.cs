@@ -29,7 +29,7 @@ namespace ASPMicroSocialPlatform.Controllers
 		public IActionResult Index()
 		{
 			var users = _context.Users.ToList();
-			return View(users);
+            return View(users);
 		}
 
         [HttpGet]

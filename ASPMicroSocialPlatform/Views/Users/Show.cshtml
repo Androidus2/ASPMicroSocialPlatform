@@ -58,19 +58,7 @@
                 <div class="row row-cols-1 row-cols-md-3 g-4">
                     @foreach (var post in Model.Posts)
                     {
-                        <div class="col">
-                            <div class="card h-100 border-0">
-                                <a asp-action="Show" asp-controller="Posts" asp-route-id="@post.Id" class="text-decoration-none text-dark">
-                                    <img src="@(!string.IsNullOrEmpty(post.Image) ? post.Image : "/images/placeholder-image.jpg")" class="card-img-top" alt="Post Image" style="height: 250px; object-fit: cover;">
-                                    <div class="card-body">
-                                        <p class="card-text">@Html.Raw(post.Description)</p>
-                                    </div>
-                                </a>
-                                <div class="card-footer bg-white border-0">
-                                    <small class="text-muted">@post.Date.ToString("MMM dd, yyyy")</small>
-                                </div>
-                            </div>
-                        </div>
+                        <partial name="_PostPartial" model="post" />
                     }
                 </div>
             }

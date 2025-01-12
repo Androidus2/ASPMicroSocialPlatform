@@ -5,12 +5,16 @@
     <!-- Post Header -->
     <div class="card-header bg-white border-0 py-3">
         <div class="d-flex align-items-center">
-            <img src="@(!string.IsNullOrEmpty(Model.User.ProfilePicture) ? Model.User.ProfilePicture : "/images/MissingNo.png")"
-                 class="rounded-circle me-3"
-                 style="width: 40px; height: 40px; object-fit: cover;"
-                 alt="Profile Picture">
+            <a href="@Url.Action("Show", "Users", new { id = Model.UserId })" class="text-decoration-none">
+                <img src="@(!string.IsNullOrEmpty(Model.User.ProfilePicture) ? Model.User.ProfilePicture : "/images/MissingNo.png")"
+                     class="rounded-circle me-3"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     alt="Profile Picture">
+            </a>
             <div>
-                <h6 class="mb-0 fw-bold">@Model.User.LastName @Model.User.FirstName</h6>
+                <a href="@Url.Action("Show", "Users", new { id = Model.UserId })" class="text-decoration-none text-dark user-name">
+                    <h6 class="mb-0 fw-bold">@Model.User.LastName @Model.User.FirstName</h6>
+                </a>
                 <small class="text-muted">@Model.Date.ToString("MMM dd, yyyy")</small>
             </div>
         </div>
@@ -119,12 +123,16 @@
                         <!-- Comment Content -->
                         <div id="commentContent-@comment.Id">
                             <div class="d-flex mb-2">
-                                <img src="@(!string.IsNullOrEmpty(comment.User.ProfilePicture) ? comment.User.ProfilePicture : "/images/MissingNo.png")"
-                                     class="rounded-circle me-2"
-                                     style="width: 32px; height: 32px; object-fit: cover;"
-                                     alt="Profile Picture">
+                                <a href="@Url.Action("Show", "Users", new { id = comment.UserId })" class="text-decoration-none">
+                                    <img src="@(!string.IsNullOrEmpty(comment.User.ProfilePicture) ? comment.User.ProfilePicture : "/images/MissingNo.png")"
+                                         class="rounded-circle me-2"
+                                         style="width: 32px; height: 32px; object-fit: cover;"
+                                         alt="Profile Picture">
+                                </a>
                                 <div>
-                                    <h6 class="mb-0 fw-bold">@comment.User.FirstName @comment.User.LastName</h6>
+                                    <a href="@Url.Action("Show", "Users", new { id = comment.UserId })" class="text-decoration-none text-dark user-name">
+                                        <h6 class="mb-0 fw-bold">@comment.User.FirstName @comment.User.LastName</h6>
+                                    </a>
                                     <small class="text-muted">@comment.Date.ToString("MMM dd, yyyy")</small>
                                 </div>
                             </div>

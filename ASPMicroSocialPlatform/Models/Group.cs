@@ -7,10 +7,10 @@ namespace ASPMicroSocialPlatform.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Numele grupului este obligatoriu!")]
         public string? Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Descrierea grupului este obligatorie!")]
         public string? Description { get; set; }
 
 

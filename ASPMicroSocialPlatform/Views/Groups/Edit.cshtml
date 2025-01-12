@@ -1,21 +1,15 @@
-﻿@model GroupEditModel
+﻿@model GroupCreateModel
 
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white border-0 py-3">
         <div class="d-flex align-items-center">
-            <i class="bi bi-gear-fill fs-4 me-2"></i>
+            <i class="bi bi-pencil-square fs-4 me-2"></i>
             <h2 class="mb-0">Edit Group</h2>
         </div>
     </div>
 
     <div class="card-body p-4">
-        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-            <input type="hidden" asp-for="Id" />
-            @foreach (var userId in Model.SelectedUserIds)
-            {
-                <input type="hidden" name="SelectedUserIds" value="@userId" />
-            }
-
+        <form asp-action="Edit" asp-route-id="@Model.GroupId" method="post">
             <div class="mb-3">
                 <label asp-for="Name" class="form-label">Group Name</label>
                 <input asp-for="Name" class="form-control" />
@@ -38,17 +32,23 @@
                 </div>
                 <div id="searchResults" class="border rounded p-2 mb-2" style="max-height: 200px; overflow-y: auto;"></div>
                 <div id="selectedUsers">
-                    <partial name="_SelectedUsersPartialForEdit" model="Model" />
+                    <partial name="_SelectedUsersPartial" model="Model" />
                 </div>
             </div>
 
+            @* @foreach (var userId in Model.SelectedUserIds)
+            {
+            <input type="hidden" name="SelectedUserIds" value="@userId" />
+            } *@
+
             <div class="d-flex justify-content-between">
-                <a asp-action="Show" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Back to Group
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Groups
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg me-2"></i>Save Changes
+                    <i class="bi bi-pencil-square me-2"></i>Edit Group
                 </button>
+
             </div>
         </form>
     </div>

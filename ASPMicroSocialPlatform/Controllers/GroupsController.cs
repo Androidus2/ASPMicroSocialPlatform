@@ -65,6 +65,14 @@ namespace ASPMicroSocialPlatform.Controllers
                 .Select(ug => ug.Group)
                 .ToListAsync();
 
+            if (User.IsInRole("Admin"))
+            {
+                groups = await _context.Groups
+                    .Include(g => g.UserGroups)
+                        .ThenInclude(ug => ug.User)
+                    .ToListAsync();
+            }
+
 
             return View(groups);
         }
@@ -83,13 +91,21 @@ namespace ASPMicroSocialPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> New(GroupCreateModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            // print the data in the model
+            var json = JsonSerializer.Serialize(model);
+            Console.WriteLine(json);
 
             // Fetch all selected users to ensure model is complete
             var selectedUsers = await _context.Users
                 .Where(u => model.SelectedUserIds.Contains(u.Id))
                 .ToListAsync();
             model.SelectedUsers = selectedUsers;
+
+            Console.WriteLine("Gonna check the model validity");
+
+            if (!ModelState.IsValid) return View(model);
+
+            Console.WriteLine("Model is valid!!!!!!!!!!!!!!!!!");
 
             var group = new ASPMicroSocialPlatform.Models.Group
             {
@@ -144,10 +160,10 @@ namespace ASPMicroSocialPlatform.Controllers
             if (user != null && !model.SelectedUserIds.Contains(userId))
             {
                 model.SelectedUserIds.Add(userId);
-                model.SelectedUsers = await _context.Users
-                    .Where(u => model.SelectedUserIds.Contains(u.Id))
-                    .ToListAsync();
             }
+            model.SelectedUsers = await _context.Users
+                .Where(u => model.SelectedUserIds.Contains(u.Id))
+                .ToListAsync();
 
             return PartialView("_SelectedUsersPartial", model);
         }
@@ -185,18 +201,16 @@ namespace ASPMicroSocialPlatform.Controllers
                 return NotFound();
 
             var userGroup = group.UserGroups.FirstOrDefault(ug => ug.UserId == currentUserId);
-            if (userGroup?.IsModerator != true)
+            if (userGroup?.IsModerator != true && !User.IsInRole("Admin"))
                 return Forbid();
 
-            var model = new GroupEditModel
+            var model = new GroupCreateModel
             {
-                Id = group.Id, // id al grupui
+                GroupId = group.Id, // id al grupui
                 Name = group.Name,
                 Description = group.Description,
                 SelectedUserIds = group.UserGroups.Select(ug => ug.UserId).ToList(),
-                SelectedUsers = group.UserGroups.Select(ug => ug.User).ToList(),
-                IsCurrentUserModerator = true,
-                CurrentUserId = currentUserId
+                SelectedUsers = group.UserGroups.Select(ug => ug.User).ToList()
             };
 
             return View(model);
@@ -205,8 +219,13 @@ namespace ASPMicroSocialPlatform.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, GroupEditModel model)
+        public async Task<IActionResult> Edit(int id, GroupCreateModel model)
         {
+            var selectedUsers = await _context.Users
+                .Where(u => model.SelectedUserIds.Contains(u.Id))
+                .ToListAsync();
+            model.SelectedUsers = selectedUsers;
+
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -220,7 +239,7 @@ namespace ASPMicroSocialPlatform.Controllers
             var currentUserId = _userManager.GetUserId(User);
             var userGroup = group.UserGroups.FirstOrDefault(ug => ug.UserId == currentUserId);
 
-            if (userGroup?.IsModerator != true)
+            if (userGroup?.IsModerator != true && !User.IsInRole("Admin"))
                 return Forbid();
 
             group.Name = model.Name;
@@ -262,10 +281,13 @@ namespace ASPMicroSocialPlatform.Controllers
                 return NotFound();
 
             var userGroup = group.UserGroups.FirstOrDefault(ug => ug.UserId == currentUserId);
-            if (userGroup == null)
+            if (userGroup == null && !User.IsInRole("Admin"))
                 return Forbid();
 
-            ViewBag.IsModerator = userGroup.IsModerator;
+            if(userGroup != null)
+                ViewBag.IsModerator = userGroup.IsModerator;
+            else
+                ViewBag.IsModerator = false;
             ViewBag.CurrentUserId = currentUserId;
             
 
@@ -280,6 +302,22 @@ namespace ASPMicroSocialPlatform.Controllers
 
         private async Task<List<ASPMicroSocialPlatform.Models.Group>> GetUserGroups(string userId)
         {
+            /*return await _context.UserGroups
+                .Include(ug => ug.Group)
+                    .ThenInclude(g => g.UserGroups)
+                        .ThenInclude(ug => ug.User)
+                .Where(ug => ug.UserId == userId)
+                .Select(ug => ug.Group)
+                .ToListAsync();*/
+            // if the user is an admin, return all groups
+            if (User.IsInRole("Admin"))
+            {
+                return await _context.Groups
+                    .Include(g => g.UserGroups)
+                        .ThenInclude(ug => ug.User)
+                    .ToListAsync();
+            }
+
             return await _context.UserGroups
                 .Include(ug => ug.Group)
                     .ThenInclude(g => g.UserGroups)
@@ -303,11 +341,53 @@ namespace ASPMicroSocialPlatform.Controllers
             var currentUserId = _userManager.GetUserId(User);
             var userGroup = group.UserGroups.FirstOrDefault(ug => ug.UserId == currentUserId);
 
-            if (userGroup?.IsModerator != true)
+            if (userGroup?.IsModerator != true && !User.IsInRole("Admin"))
                 return Forbid();
 
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Leave(int id)
+        {
+
+            var userId = _userManager.GetUserId(User);
+
+            // look through UserGroups and find the one with the current user and the group
+            var userGroup = await _context.UserGroups
+                .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == id);
+
+            if (userGroup == null)
+            {
+                TempData["message"] = "Nu faci parte din acest grup!";
+                TempData["messageType"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // remove the user from the group and if he is the last one, delete the group
+            _context.UserGroups.Remove(userGroup);
+            await _context.SaveChangesAsync();
+
+            var group = await _context.Groups
+                .Include(g => g.UserGroups)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (group != null) {
+                if (group.UserGroups.Count == 0)
+                {
+                    _context.Groups.Remove(group);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+
+
+            TempData["message"] = "Ai parasit grupul cu succes!";
+            TempData["messageType"] = "success";
 
             return RedirectToAction(nameof(Index));
         }

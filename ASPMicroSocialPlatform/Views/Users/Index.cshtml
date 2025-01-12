@@ -32,9 +32,9 @@
         text-decoration: none;
     }
 
-        .card-title a:hover {
-            color: #3498db;
-        }
+    .card-title a:hover {
+        color: #3498db;
+    }
 
     .btn-custom {
         border-radius: 20px;
@@ -62,38 +62,7 @@
     <div class="row g-4">
         @foreach (var user in Model)
         {
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card user-card h-100">
-                    <div class="text-center">
-                        <img src="@(!string.IsNullOrEmpty(user.ProfilePicture) ? user.ProfilePicture : Url.Content("~/images/MissingNo.png"))"
-                             class="profile-image" alt="@user.FirstName's profile picture">
-                    </div>
-                    <div class="card-body text-center">
-                        <h3 class="card-title">
-                            <a href="@Url.Action("Show", "Users", new { id = user.Id })">
-                                <i class="fas fa-user me-2"></i>@user.FirstName @user.LastName
-                            </a>
-                        </h3>
-                        <p class="card-text text-muted">
-                            <i class="fas fa-quote-left fa-sm me-2"></i>@(string.IsNullOrEmpty(user.Bio) ? "No bio available" : user.Bio)
-                        </p>
-                        <p class="card-text">
-                            <i class="fas fa-envelope me-2"></i>
-                            <small class="text-muted">@user.Email</small>
-                        </p>
-                        <div class="mt-3">
-                            <a href="@Url.Action("Edit", "Users", new { id = user.Id })"
-                               class="btn btn-custom btn-edit text-white">
-                                <i class="fas fa-edit me-2"></i>Edit
-                            </a>
-                            <a href="@Url.Action("Delete", "Users", new { id = user.Id })"
-                               class="btn btn-custom btn-delete text-white">
-                                <i class="fas fa-trash-alt me-2"></i>Delete
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <partial name="_UserCard" model="user" />
         }
     </div>
 </div>
